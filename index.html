@@ -297,16 +297,16 @@
     <div class="card p-4">
       <h3 class="mb-4">הזן <span id="totalPlayersSpan">18</span> שמות שחקנים</h3>
       <form id="playersForm" class="needs-validation" novalidate>
-        <div class="mb-3">
-          <textarea id="playersInput" rows="6" class="form-control"
-                    placeholder="הקלד שמות שחקנים, מופרדים בפסיק או שורה חדשה"
-                    required></textarea>
-          <div class="invalid-feedback">
-            נא להזין את כל שמות השחקנים
-          </div>
-        </div>
-        <button type="submit" class="btn btn-success">הגדר קבוצות</button>
-      </form>
+  <div class="mb-3">
+    <textarea id="playersInput" rows="6" class="form-control"
+              placeholder="הקלד שמות שחקנים, מופרדים בפסיק או שורה חדשה"
+              required></textarea>
+    <div class="invalid-feedback">
+      נא להזין את כל שמות השחקנים
+    </div>
+  </div>
+  <button type="submit" class="btn btn-success">הגדר קבוצות</button>
+</form>
     </div>
   </div>
   <!-- Screen 3: Team Definition -->
@@ -467,6 +467,13 @@ const alarmSound = new Audio('data:audio/wav;base64,//uQRAAAAWMSLwUIYAAsYkXgoQwA
 
 // Form Validation
 function validateForm(form) {
+  if (!form) {
+    console.error('No form provided');
+    return false;
+  }
+
+  console.log('Validating form:', form.id); // לבדיקה
+
   if (!form.checkValidity()) {
     form.classList.add('was-validated');
     return false;
@@ -667,22 +674,28 @@ function initializeEventListeners() {
   });
 
   // Players Form
-  document.getElementById('playersForm').addEventListener('submit', (e) => {
-    e.preventDefault();
-    if (validateForm(e.target)) {
-      const rawText = document.getElementById('playersInput').value.trim();
-      const names = rawText.split(/[\n,]+/).map(s => s.trim()).filter(s => s);
-      
-      if (names.length === totalPlayers) {
-        playersPool = names;
-        setupTeamsArray();
-        renderTeamsDefinition();
-        showScreen('screenDefineTeams');
-      } else {
-        alert(`נא להזין בדיוק ${totalPlayers} שמות!`);
-      }
+document.getElementById('playersForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  if (validateForm(e.target)) {
+    const rawText = document.getElementById('playersInput').value.trim();
+    // שיפור הפיצול של השמות - תמיכה בפסיקים ושורות חדשות
+    const names = rawText.split(/[,\n]+/)
+      .map(name => name.trim())
+      .filter(name => name.length > 0); // סינון שורות ריקות
+
+    console.log('Names:', names); // לבדיקה
+    console.log('Expected players:', totalPlayers); // לבדיקה
+
+    if (names.length === totalPlayers) {
+      playersPool = names;
+      setupTeamsArray();
+      renderTeamsDefinition();
+      showScreen('screenDefineTeams');
+    } else {
+      alert(`נא להזין בדיוק ${totalPlayers} שמות! (הוזנו ${names.length} שמות)`);
     }
-  });
+  }
+});
 
   // Teams Definition Done Button
   document.getElementById('teamsDefinitionDoneBtn').addEventListener('click', () => {
