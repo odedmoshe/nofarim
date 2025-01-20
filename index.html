@@ -2,127 +2,52 @@
 <html lang="he">
 <head>
   <meta charset="UTF-8">
-  <title>טורניר כדורגל - המפסיד יוצא (משופר)</title>
+  <title>טורניר כדורגל - המפסיד יוצא (מורחב)</title>
+
+  <!-- אייקון / מניפסט ל-PWA -->
+  <link rel="icon" href="icons/icon-192.png" type="image/png">
+  <link rel="manifest" href="manifest.json">
+
   <!-- פונט מגוגל -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700&display=swap" rel="stylesheet">
+  <link 
+    href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700&display=swap" 
+    rel="stylesheet"
+  >
+
+  <!-- Bootstrap CSS -->
+  <link 
+    rel="stylesheet" 
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+  >
+
+  <!-- Chart.js -->
+  <script 
+    src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js">
+  </script>
+
   <style>
-    /* ---------------------------------------------------
-       עיצוב בסיסי
-    --------------------------------------------------- */
-    * {
-      box-sizing: border-box;
-    }
     body {
       direction: rtl;
-      margin: 0;
       font-family: 'Heebo', Arial, sans-serif;
-      background: #f0f0f0;
-      color: #333;
+      background: #f5f5f5;
     }
-    header {
-      position: relative;
-      background: linear-gradient(135deg, #3f51b5, #3949ab);
-      color: #fff;
-      padding: 15px;
-      text-align: center;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    }
-    /* כפתור סיום טורניר */
-    header button {
-      position: absolute;
-      left: 10px;
-      top: 10px;
-      background: #d32f2f;
-      border: none;
-      color: #fff;
-      padding: 8px 12px;
-      cursor: pointer;
-      border-radius: 4px;
-      font-size: 14px;
-    }
-    header button:hover {
-      background: #b71c1c;
-    }
-
-    h1, h2, h3 {
-      margin-top: 0;
-      margin-bottom: 0.5em;
-    }
-    .container {
-      max-width: 1100px;
-      margin: 20px auto;
-      background: #fff;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      padding: 20px;
-      border-radius: 8px;
-      margin-bottom: 30px;
-    }
-    .container h2.title {
-      text-align: center;
-      margin-top: 0;
+    .navbar-brand {
+      margin: 0 auto;
     }
     .hidden {
       display: none;
     }
-
-    label {
-      display: block;
-      margin: 8px 0 4px;
-      font-weight: 500;
+    .fade-in {
+      animation: fadeIn 0.4s ease-in-out;
     }
-    textarea, select, input[type="text"], input[type="number"], input[type="color"] {
-      width: 100%;
-      padding: 8px;
-      margin-bottom: 10px;
-      font-family: inherit;
-      border: 1px solid #ccc;
-      border-radius: 4px;
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
-    textarea {
-      height: 100px;
-    }
-    button {
-      background: #3f51b5;
-      color: #fff;
-      border: none;
-      padding: 10px 20px;
+    [data-bs-toggle="tooltip"] {
       cursor: pointer;
-      border-radius: 4px;
-      font-size: 16px;
-    }
-    button:hover {
-      background: #303f9f;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 10px 0;
-      font-size: 14px;
-    }
-    th, td {
-      border: 1px solid #ccc;
-      text-align: center;
-      padding: 8px;
-    }
-    thead {
-      background: #f0f0f0;
-    }
-    .teamColorBox {
-      display: inline-block;
-      width: 12px;
-      height: 12px;
-      margin-left: 5px;
-      vertical-align: middle;
-    }
-
-    /* לוחות */
-    .teamsAssignment {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
     }
     .player-row {
       display: flex;
@@ -134,239 +59,809 @@
       border: 1px solid #eee;
       border-radius: 4px;
     }
-    .match-form label {
-      display: block;
-      margin-bottom: 5px;
-      font-weight: 500;
+    .player-controls button {
+      margin-left: 4px;
     }
-    .match-form input[type="number"] {
-      width: 70px;
+    .table th, .table td {
+      vertical-align: middle;
     }
-    .match-form input[type="text"] {
-      width: 100%;
+    #installBtn {
+      display: none;
     }
-
-    /* תצוגת טורניר במבנה גמיש */
-    .side-by-side {
-      display: flex;
-      gap: 20px;
-      flex-wrap: wrap;
-    }
-    .side-by-side > div {
-      flex: 1 1 300px;
-      min-width: 280px;
-    }
-    .title {
-      margin-top: 0;
-      text-align: center;
-      font-weight: 700;
-    }
-
-    /* חלון לגרפיקת "בחירת מפסידה בתיקו" */
-    #tiePanel {
-      position: fixed;
-      z-index: 9999;
-      top: 0; 
-      left: 0;
-      width: 100%; 
-      height: 100%;
-      background: rgba(0,0,0,0.5);
-      display: none; 
-      align-items: center; 
-      justify-content: center;
-    }
-    #tiePanelContent {
-      background: #fff;
-      padding: 20px;
-      max-width: 400px;
-      border-radius: 8px;
-      text-align: center;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-    }
-    #tiePanelContent h3 {
-      margin-top: 0;
-    }
-    #tiePanelContent button {
-      margin: 10px;
-      width: 80%;
-      display: block;
-    }
-
-    /* עיצוב למסכים קטנים */
-    @media (max-width: 600px) {
-      header h1 {
-        font-size: 18px;
-      }
-      button {
-        font-size: 14px;
-        padding: 8px 12px;
-      }
-      .container {
-        margin: 10px auto;
-        padding: 15px;
-      }
-      .match-form input[type="number"] {
-        width: 60px;
-      }
+    /* כפתור רישום ל‑PWA */
+    #installBtn.btn {
+      position: absolute;
+      right: 80px;
+      top: 10px;
     }
   </style>
 </head>
-<body>
+<body class="bg-light">
 
-<header>
-  <h1>טורניר כדורגל - המפסיד יוצא (משופר)</h1>
-  <button id="endTournamentBtn">סיום הטורניר</button>
-</header>
-
-<!-- חלון בחירת מפסידה בתיקו -->
-<div id="tiePanel">
-  <div id="tiePanelContent">
-    <h3>תיקו! בחר מי הפסידה בהגרלה</h3>
-    <p id="tieTeamsText" style="font-weight:bold;"></p>
-    <button id="tieTeamAButton"></button>
-    <button id="tieTeamBButton"></button>
+<!-- סרגל עליון: כפתור "סיום טורניר", כפתור התקנת PWA -->
+<nav class="navbar navbar-dark bg-primary">
+  <div class="container-fluid">
+    <button 
+      class="btn btn-danger" 
+      id="endTournamentBtn"
+      data-bs-toggle="tooltip"
+      data-bs-placement="bottom"
+      title="סיים את הטורניר ועבור למסך הסיום">
+      סיום טורניר
+    </button>
+    <span class="navbar-brand">ניהול טורניר - המפסיד יוצא</span>
+    <button 
+      class="btn btn-warning" 
+      id="installBtn"
+      data-bs-toggle="tooltip"
+      data-bs-placement="bottom"
+      title="התקן כאפליקציה על המכשיר שלך">
+      התקן (PWA)
+    </button>
   </div>
-</div>
+</nav>
 
-<!-- מסך ראשון: הזנת 18 שמות שחקנים -->
-<div id="screenEnterPlayers" class="container">
-  <h2 class="title">הזן 18 שמות שחקנים</h2>
-  <p>אנא הזן 18 שמות (מופרדים בפסיק או בשורות) ואז לחץ "המשך".</p>
-  <textarea id="playersInput" placeholder="הקלד כאן 18 שמות..."></textarea>
-  <button id="goToDefineTeamsBtn">המשך</button>
-</div>
-
-<!-- מסך שני: הגדרת שמות הקבוצות וצבעים באופן דינמי -->
-<div id="screenDefineTeams" class="container hidden">
-  <h2 class="title">הגדרת 3 הקבוצות</h2>
-  <p>הקלד שם ובחר צבע לכל קבוצה.</p>
-  <div id="teamsConfig"></div>
-  <button id="teamsConfigDoneBtn">המשך לחלוקת שחקנים</button>
-</div>
-
-<!-- מסך שלישי: חלוקת השחקנים לקבוצות -->
-<div id="screenAssignTeams" class="container hidden">
-  <h2 class="title">חלוקת שחקנים לקבוצות</h2>
-  <p>בחר לכל שחקן לאיזו קבוצה הוא שייך. בסוף צריך לוודא שיש בדיוק 6 בכל קבוצה.</p>
-  <div class="teamsAssignment" id="playersPool"></div>
-  <button id="assignTeamsDoneBtn">סיום החלוקה</button>
-</div>
-
-<!-- מסך רביעי: הטורניר -->
-<div id="screenTournament" class="container hidden">
-  <h2 class="title">מסך הטורניר</h2>
-
-  <!-- טבלת הקבוצות + מלך השערים -->
-  <div class="side-by-side">
-    <div>
-      <h3>טבלת הקבוצות</h3>
-      <table id="teamsTable">
-        <thead>
-          <tr>
-            <th>קבוצה</th>
-            <th>צבע</th>
-            <th>נקודות</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
+<div class="container mt-3 fade-in" id="appContainer">
+  <!-- מסך ראשון: הגדרת טורניר - (כמה קבוצות, כמה שחקנים בקבוצה) -->
+  <div id="screenConfig" class="fade-in">
+    <h2>הגדרת הטורניר</h2>
+    <div class="mb-3">
+      <label>מספר קבוצות:</label>
+      <input type="number" class="form-control" id="numTeamsInput" min="2" value="3">
     </div>
-    <div>
-      <h3>מלך השערים</h3>
-      <table id="scorersTable">
-        <thead>
-          <tr>
-            <th>שחקן</th>
-            <th>קבוצה</th>
-            <th>שערים</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
+    <div class="mb-3">
+      <label>מספר שחקנים בכל קבוצה:</label>
+      <input type="number" class="form-control" id="playersPerTeamInput" min="1" value="6">
+    </div>
+    <button class="btn btn-primary" id="startSetupBtn">המשך</button>
+  </div>
+
+  <!-- מסך שני: הזנת שמות שחקנים (סה"כ numTeams * playersPerTeam) -->
+  <div id="screenPlayers" class="hidden fade-in">
+    <h3>הזן <span id="totalPlayersSpan">18</span> שמות שחקנים</h3>
+    <textarea 
+      id="playersInput" 
+      rows="6" 
+      class="form-control mb-3"
+      placeholder="הקלד כאן את השמות... (מופרדים בפסיק או בשורות)">
+    </textarea>
+    <button class="btn btn-success" id="goToDefineTeamsBtn">הגדר קבוצות</button>
+  </div>
+
+  <!-- מסך שלישי: הגדרת שמות וצבעים של הקבוצות (אופציה לברירת מחדל) -->
+  <div id="screenDefineTeams" class="hidden fade-in">
+    <h3>הגדרת הקבוצות</h3>
+    <div id="teamsDefinition"></div>
+    <button class="btn btn-secondary" id="teamsDefinitionDoneBtn">
+      המשך לחלוקת שחקנים
+    </button>
+  </div>
+
+  <!-- מסך רביעי: חלוקת השחקנים לקבוצות (בודק שאין שחקן לא מוקצה, ושבכל קבוצה יש playersPerTeam) -->
+  <div id="screenAssign" class="hidden fade-in">
+    <h3>חלוקת שחקנים לקבוצות</h3>
+    <div id="playersAssignContainer" class="mb-3"></div>
+    <button class="btn btn-primary" id="finishAssignBtn">סיום החלוקה</button>
+  </div>
+
+  <!-- מסך חמישי: ניהול טורניר (2 קבוצות פעילות, השאר ממתינות, המפסידה יוצאת) -->
+  <div id="screenTournament" class="hidden fade-in">
+    <h3>מסך הטורניר</h3>
+
+    <!-- טבלת קבוצות מורחבת: W, D, L, GF, GA, GD, PTS, Rank -->
+    <h5>טבלת הקבוצות</h5>
+    <table class="table table-bordered text-center" id="teamsTable">
+      <thead class="table-light">
+        <tr>
+          <th>קבוצה</th>
+          <th>צבע</th>
+          <th>W</th>
+          <th>D</th>
+          <th>L</th>
+          <th>GF</th>
+          <th>GA</th>
+          <th>+/-</th>
+          <th>נקודות</th>
+          <th>מיקום</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <!-- מלך השערים -->
+    <h5>מלך השערים</h5>
+    <table class="table table-bordered table-sm" id="scorersTable">
+      <thead class="table-light">
+        <tr>
+          <th>שחקן</th>
+          <th>קבוצה</th>
+          <th>שערים</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <hr/>
+    <!-- בחירת המבקיעים: הצגת שחקני שתי הקבוצות הפעילות עם כפתורי +/– -->
+    <h5 id="currentMatchTitle"></h5>
+    <div class="row" id="activeTeamsPlayersContainer"></div>
+
+    <div class="mt-2 mb-3">
+      <p>
+        <strong>תוצאה:</strong> 
+        <span>קבוצה A: <span id="teamAGoalsLabel">0</span></span> |
+        <span>קבוצה B: <span id="teamBGoalsLabel">0</span></span>
+      </p>
+      <button class="btn btn-success" id="submitMatchBtn">סיים משחק</button>
+    </div>
+
+    <hr/>
+    <h5>גרף שערים כלליים (דוגמה)</h5>
+    <canvas id="goalsChart" width="400" height="150"></canvas>
+
+    <hr/>
+    <h5>משחקים שהתקיימו</h5>
+    <table class="table table-bordered" id="matchesTable">
+      <thead class="table-light">
+        <tr>
+          <th>#</th>
+          <th>משחק</th>
+          <th>תוצאה</th>
+          <th>עולה</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <!-- מסך שישי: סיום הטורניר -->
+  <div id="screenEnd" class="hidden fade-in">
+    <h2>הטורניר הסתיים</h2>
+    <p>תודה רבה! אם תרצה להתחיל טורניר חדש, נא לרענן את הדף או חזור לראשית.</p>
+  </div>
+</div>
+
+<!-- מודאל (Modal) של תיקו - לבחור מי המפסיד -->
+<div class="modal fade" id="tieModal" tabindex="-1" aria-labelledby="tieModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content p-3">
+      <h5 id="tieModalLabel" class="mb-3">תיקו! בחר מי הפסידה בהגרלה</h5>
+      <p id="tieModalTeams" class="fw-bold text-center"></p>
+      <div class="d-grid gap-2">
+        <button class="btn btn-warning" id="tieTeamAButton"></button>
+        <button class="btn btn-warning" id="tieTeamBButton"></button>
+      </div>
     </div>
   </div>
-
-  <!-- טופס משחק נוכחי -->
-  <div class="match-form">
-    <h3>משחק נוכחי</h3>
-    <p id="currentMatchTitle"></p>
-
-    <label id="labelTeamA"></label>
-    <input type="number" id="teamAGoals" min="0" value="0">
-    <label id="labelScorersA">מבקיעים (<span id="teamAName"></span>):</label>
-    <input type="text" id="teamAScorers" placeholder="מופרדים בפסיק">
-
-    <br/><br/>
-
-    <label id="labelTeamB"></label>
-    <input type="number" id="teamBGoals" min="0" value="0">
-    <label id="labelScorersB">מבקיעים (<span id="teamBName"></span>):</label>
-    <input type="text" id="teamBScorers" placeholder="מופרדים בפסיק">
-
-    <br/><br/>
-    <button id="submitMatchBtn">הכנס תוצאה</button>
-  </div>
-
-  <hr/>
-
-  <!-- היסטוריית המשחקים -->
-  <h3>משחקים שהתקיימו</h3>
-  <table>
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>משחק</th>
-        <th>תוצאה</th>
-        <th>עולה</th>
-      </tr>
-    </thead>
-    <tbody id="matchesHistoryBody"></tbody>
-  </table>
 </div>
 
-<!-- מסך חמישי: סיום הטורניר -->
-<div id="screenEnd" class="container hidden">
-  <h2 class="title">הטורניר הסתיים</h2>
-  <p>תודה רבה! ניתן לצפות בנתונים האחרונים שהוזנו, או לרענן את הדף כדי להתחיל מחדש.</p>
-</div>
+<!-- Bootstrap Bundle + Popper -->
+<script 
+  src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js">
+</script>
 
 <script>
-/* -------------------------------------------------------------------------
-   1) נתונים בסיסיים
--------------------------------------------------------------------------- */
+// ---------------------------------------------------
+//   SERVICE WORKER + PWA התקנה
+// ---------------------------------------------------
+let deferredPrompt = null;
+const installBtn = document.getElementById("installBtn");
 
-// כאן יאוחסנו 3 אובייקטי קבוצות: { name, color, players:[], points }
-let teams = [
-  { name: "", color: "#ff0000", players: [], points: 0 },
-  { name: "", color: "#0000ff", players: [], points: 0 },
-  { name: "", color: "#00ff00", players: [], points: 0 },
-];
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  installBtn.style.display = 'inline-block';
+});
 
-// 18 השחקנים, נקלטים במסך ראשון
-let playersPool = [];
+installBtn.addEventListener('click', async() => {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      console.log('User accepted A2HS');
+    } else {
+      console.log('User dismissed A2HS');
+    }
+    deferredPrompt = null;
+    installBtn.style.display = 'none';
+});
 
-// מבקיעים: { "שם שחקן": { goals:number, team:string } }
-const scorers = {};
+// הפעלת ה-Tooltip של בוטסטראפ
+document.addEventListener('DOMContentLoaded', () => {
+  const tooltipTriggerList = [].slice.call(
+    document.querySelectorAll('[data-bs-toggle="tooltip"]')
+  );
+  tooltipTriggerList.map((tooltipTriggerEl) => {
+    return new bootstrap.Tooltip(tooltipTriggerEl);
+  });
+});
 
-// היסטוריית משחקים: מערך של אובייקטים: { matchNumber, tA, tB, goalsA, goalsB, winner=null/idx, winnerAfterTie=idx? }
-const matches = [];
+// ---------------------------------------------------
+//  משתנים גלובליים למבנה האפליקציה
+// ---------------------------------------------------
+let numTeams = 3;          // מספר קבוצות
+let playersPerTeam = 6;    // כמה שחקנים בכל קבוצה
+let totalPlayers = 18;     // numTeams * playersPerTeam
+let playersPool = [];      // מערך שמות השחקנים
 
-// "המפסיד יוצא": בכל רגע שתי קבוצות משחקות (activeTeams), אחת ממתינה (waitingTeam)
-let activeTeams = [0, 1];
-let waitingTeam = 2;
-let matchCount = 0;
+// בכל קבוצה: { name, color, players:[], w, d, l, gf, ga, gd, points }
+let teams = [];
 
-// tieState ישמור מידע זמני אם קרה תיקו ונחכה לבחירת המשתמש
-let tieState = null;
+// "המפסיד יוצא" – נוסיף מערך של 'activeTeamIndices' ומשתנה לwaitingTeams, 
+// כדי לתמוך גם ב-4+ קבוצות
+let activeTeams = [];   // נניח 2 על המגרש
+let waitingTeams = [];  // השאר (numTeams - 2)
+let matches = [];       // היסטוריית משחקים
+let matchCount = 0;     // מונה משחקים
+let tieState = null;    // מידע זמני אם קרה תיקו
 
-/* -------------------------------------------------------------------------
-   2) מעבר בין מסכים
--------------------------------------------------------------------------- */
+// scorers = { "שחקן": { goals, teamName } }
+let scorers = {};
+
+// הגרף (Chart.js)
+let goalsChart = null;
+let chartData = {
+  labels: [],
+  datasets: [{
+    label: 'סך שערים במשחק',
+    data: [],
+    borderColor: 'blue',
+    backgroundColor: 'rgba(54,162,235,0.2)'
+  }]
+};
+
+// ---------------------------------------------------
+//  שלב 1: הגדרת טורניר (מספר קבוצות, וכו')
+// ---------------------------------------------------
+const screenConfig = document.getElementById("screenConfig");
+const startSetupBtn = document.getElementById("startSetupBtn");
+startSetupBtn.addEventListener("click", () => {
+  numTeams = parseInt(document.getElementById("numTeamsInput").value) || 2;
+  playersPerTeam = parseInt(document.getElementById("playersPerTeamInput").value) || 1;
+  if (numTeams < 2) numTeams = 2;
+  if (playersPerTeam < 1) playersPerTeam = 1;
+  totalPlayers = numTeams * playersPerTeam;
+  // מעבר למסך 'screenPlayers'
+  showScreen("screenPlayers");
+  document.getElementById("totalPlayersSpan").textContent = totalPlayers;
+});
+
+// ---------------------------------------------------
+//  שלב 2: הזנת שמות שחקנים
+// ---------------------------------------------------
+const screenPlayers = document.getElementById("screenPlayers");
+const goToDefineTeamsBtn = document.getElementById("goToDefineTeamsBtn");
+goToDefineTeamsBtn.addEventListener("click", () => {
+  const rawText = document.getElementById("playersInput").value.trim();
+  if (!rawText) {
+    alert("לא הוזנו שמות!");
+    return;
+  }
+  let names = rawText.split(/[\n,]+/).map(s => s.trim()).filter(s => s);
+  if (names.length !== totalPlayers) {
+    alert(`צריך להזין בדיוק ${totalPlayers} שמות!`);
+    return;
+  }
+  playersPool = names;
+  // מעבר למסך הגדרת הקבוצות
+  setupTeamsArray(); // נכין את 'teams'
+  renderTeamsDefinition();
+  showScreen("screenDefineTeams");
+});
+
+// ---------------------------------------------------
+//  הכנת מערך teams
+//   (ברירת מחדל: "קבוצה 1" צבע אקראי וכו') 
+// ---------------------------------------------------
+function setupTeamsArray() {
+  teams = [];
+  for (let i = 0; i < numTeams; i++) {
+    teams.push({
+      name: `קבוצה ${i+1}`, 
+      color: getRandomColor(),
+      players: [],
+      w:0, d:0, l:0,
+      gf:0, ga:0, gd:0,
+      points:0
+    });
+  }
+}
+// פונקציה לעזור ליצור צבע אקראי
+function getRandomColor() {
+  const letters = '0123456789ABCDEF';
+  let color = '#';
+  for(let i=0;i<6;i++){
+    color += letters[Math.floor(Math.random()*16)];
+  }
+  return color;
+}
+
+// ---------------------------------------------------
+//  שלב 3: הגדרת הקבוצות (שם, צבע). 
+//  יש ברירת מחדל, אך אפשר לערוך
+// ---------------------------------------------------
+const screenDefineTeams = document.getElementById("screenDefineTeams");
+const teamsDefinitionDiv = document.getElementById("teamsDefinition");
+const teamsDefinitionDoneBtn = document.getElementById("teamsDefinitionDoneBtn");
+
+function renderTeamsDefinition() {
+  teamsDefinitionDiv.innerHTML = "";
+  teams.forEach((t,idx) => {
+    let div = document.createElement("div");
+    div.className = "border rounded p-2 mb-2";
+    div.innerHTML = `
+      <label>שם קבוצה #${idx+1}:</label>
+      <input type="text" class="form-control mb-2" value="${t.name}">
+      <label>צבע קבוצה #${idx+1}:</label>
+      <input type="color" class="form-control mb-2" value="${t.color}">
+    `;
+    let inputName = div.querySelector('input[type="text"]');
+    let inputColor= div.querySelector('input[type="color"]');
+    inputName.addEventListener("input", () => {
+      teams[idx].name = inputName.value || `קבוצה ${idx+1}`;
+    });
+    inputColor.addEventListener("input", () => {
+      teams[idx].color = inputColor.value;
+    });
+
+    teamsDefinitionDiv.appendChild(div);
+  });
+}
+
+teamsDefinitionDoneBtn.addEventListener("click", () => {
+  // מעבר למסך חלוקת שחקנים
+  renderPlayersAssignment();
+  showScreen("screenAssign");
+});
+
+// ---------------------------------------------------
+//  שלב 4: חלוקת השחקנים לקבוצות
+// ---------------------------------------------------
+const screenAssign = document.getElementById("screenAssign");
+const playersAssignContainer = document.getElementById("playersAssignContainer");
+const finishAssignBtn = document.getElementById("finishAssignBtn");
+
+function renderPlayersAssignment() {
+  // איפוס players בכל קבוצה
+  teams.forEach(t => t.players = []);
+  playersAssignContainer.innerHTML = "";
+  playersPool.forEach(playerName => {
+    let row = document.createElement("div");
+    row.className = "player-row";
+
+    let spanN = document.createElement("span");
+    spanN.textContent = playerName;
+
+    let selectT = document.createElement("select");
+    selectT.className = "form-select w-50";
+    let optNone = new Option("לא מוקצה","none",true,true);
+    selectT.add(optNone);
+
+    teams.forEach((tt, i) => {
+      let opt = new Option(tt.name, i);
+      selectT.add(opt);
+    });
+
+    selectT.addEventListener("change", () => {
+      // הסר מהקודם
+      teams.forEach(tt => {
+        let idx = tt.players.indexOf(playerName);
+        if (idx!==-1) tt.players.splice(idx,1);
+      });
+      // הוסף לחדש
+      if (selectT.value!=="none") {
+        teams[+selectT.value].players.push(playerName);
+      }
+    });
+
+    row.appendChild(spanN);
+    row.appendChild(selectT);
+    playersAssignContainer.appendChild(row);
+  });
+}
+
+finishAssignBtn.addEventListener("click", () => {
+  // בדוק שכל הקבוצות מלאות בדיוק playersPerTeam
+  // ואם יש שחקנים לא מוקצים
+  for (let i=0; i<teams.length; i++) {
+    if (teams[i].players.length !== playersPerTeam) {
+      alert(`חובה לחלק בדיוק ${playersPerTeam} שחקנים בכל קבוצה!
+קבוצה ${teams[i].name} כוללת כעת ${teams[i].players.length}.`);
+      return;
+    }
+  }
+  // מעבר למסך הטורניר
+  prepareTournament();
+  showScreen("screenTournament");
+  updateTeamsTable();
+  updateScorersTable();
+  renderCurrentMatch();
+  initChart();
+});
+
+// ---------------------------------------------------
+//  שלב 5: הטורניר
+//    - "המפסיד יוצא": בהתחלה ניקח 2 קבוצות ל-active, היתר ב-waiting
+// ---------------------------------------------------
+function prepareTournament() {
+  matches = [];
+  matchCount = 0;
+  scorers = {};
+  // כל הסטטיסטיקות 0
+  teams.forEach(t => {
+    t.w=0; t.d=0; t.l=0;
+    t.gf=0; t.ga=0; t.gd=0;
+    t.points=0;
+  });
+  // active
+  activeTeams = [0,1];
+  waitingTeams = [];
+  for(let i=2;i<teams.length;i++){
+    waitingTeams.push(i);
+  }
+}
+
+// רענון תצוגת המשחק הנוכחי
+function renderCurrentMatch() {
+  let tAidx = activeTeams[0], tBidx = activeTeams[1];
+  let tA = teams[tAidx], tB = teams[tBidx];
+  document.getElementById("currentMatchTitle").textContent =
+    `(${matchCount+1}) ${tA.name} נגד ${tB.name}`;
+
+  // יצירת 2 עמודות, בכל עמודה רשימת שחקני הקבוצה עם כפתורי +/–
+  let container = document.getElementById("activeTeamsPlayersContainer");
+  container.innerHTML = `
+    <div class="col-md-6" id="teamAPlayersCol"></div>
+    <div class="col-md-6" id="teamBPlayersCol"></div>
+  `;
+  let colA = document.getElementById("teamAPlayersCol");
+  let colB = document.getElementById("teamBPlayersCol");
+
+  colA.innerHTML = `<h6>${tA.name}</h6>`;
+  tA.players.forEach(playerName => {
+    let row = document.createElement("div");
+    row.className = "player-row";
+    row.innerHTML = `
+      <span>${playerName}</span>
+      <div class="player-controls">
+        <button class="btn btn-sm btn-light" data-action="minus">–</button>
+        <span class="mx-1" data-score="0">0</span>
+        <button class="btn btn-sm btn-light" data-action="plus">+</button>
+      </div>
+    `;
+    let spanScore = row.querySelector('[data-score]');
+    row.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener("click",(e)=>{
+        let act = btn.getAttribute("data-action");
+        let val = parseInt(spanScore.textContent) || 0;
+        if(act==="plus") val++;
+        if(act==="minus" && val>0) val--;
+        spanScore.textContent = val;
+        updateGoalsLabels();
+      });
+    });
+    colA.appendChild(row);
+  });
+
+  colB.innerHTML = `<h6>${tB.name}</h6>`;
+  tB.players.forEach(playerName => {
+    let row = document.createElement("div");
+    row.className = "player-row";
+    row.innerHTML = `
+      <span>${playerName}</span>
+      <div class="player-controls">
+        <button class="btn btn-sm btn-light" data-action="minus">–</button>
+        <span class="mx-1" data-score="0">0</span>
+        <button class="btn btn-sm btn-light" data-action="plus">+</button>
+      </div>
+    `;
+    let spanScore = row.querySelector('[data-score]');
+    row.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener("click",(e)=>{
+        let act = btn.getAttribute("data-action");
+        let val = parseInt(spanScore.textContent) || 0;
+        if(act==="plus") val++;
+        if(act==="minus" && val>0) val--;
+        spanScore.textContent = val;
+        updateGoalsLabels();
+      });
+    });
+    colB.appendChild(row);
+  });
+  updateGoalsLabels();
+}
+
+function updateGoalsLabels(){
+  // סוכמים את השערים בקולונה A, וקולונה B
+  let colA = document.getElementById("teamAPlayersCol");
+  let colB = document.getElementById("teamBPlayersCol");
+  let sumA=0, sumB=0;
+  colA.querySelectorAll('[data-score]').forEach(sp=>{
+    sumA += parseInt(sp.textContent) || 0;
+  });
+  colB.querySelectorAll('[data-score]').forEach(sp=>{
+    sumB += parseInt(sp.textContent) || 0;
+  });
+  document.getElementById("teamAGoalsLabel").textContent = sumA;
+  document.getElementById("teamBGoalsLabel").textContent = sumB;
+}
+
+// ---------------------------------------------------
+//  סיום משחק: עדכון תוצאה, "המפסיד יוצא"
+// ---------------------------------------------------
+document.getElementById("submitMatchBtn").addEventListener("click", () => {
+  finishMatch();
+});
+
+function finishMatch() {
+  let tAidx = activeTeams[0], tBidx = activeTeams[1];
+  let tA = teams[tAidx], tB = teams[tBidx];
+  let sumA = parseInt(document.getElementById("teamAGoalsLabel").textContent) || 0;
+  let sumB = parseInt(document.getElementById("teamBGoalsLabel").textContent) || 0;
+
+  // עדכון מלך השערים
+  // נלך על colA ו-colB, לכל שחקן, נשווה data-score
+  let colA = document.getElementById("teamAPlayersCol");
+  let colB = document.getElementById("teamBPlayersCol");
+
+  colA.querySelectorAll('.player-row').forEach(r => {
+    let name = r.querySelector('span').textContent.trim();
+    let sc = parseInt(r.querySelector('[data-score]').textContent) || 0;
+    addGoalsToScorer(name, tA.name, sc);
+  });
+  colB.querySelectorAll('.player-row').forEach(r => {
+    let name = r.querySelector('span').textContent.trim();
+    let sc = parseInt(r.querySelector('[data-score]').textContent) || 0;
+    addGoalsToScorer(name, tB.name, sc);
+  });
+
+  // עדכון סטטיסטיקות לקבוצות
+  matchCount++;
+  tA.gf += sumA; tA.ga += sumB; tA.gd = tA.gf - tA.ga;
+  tB.gf += sumB; tB.ga += sumA; tB.gd = tB.gf - tB.ga;
+
+  let loserIndex = null;
+  let winnerIndex = null;
+  if(sumA>sumB) {
+    tA.w++; tB.l++;
+    tA.points += 3;
+    winnerIndex = tAidx;
+    loserIndex = tBidx;
+  }
+  else if(sumB>sumA) {
+    tB.w++; tA.l++;
+    tB.points += 3;
+    winnerIndex = tBidx;
+    loserIndex = tAidx;
+  }
+  else {
+    // תיקו
+    tA.d++; tB.d++;
+    tA.points++; tB.points++;
+    // נפתח מודאל בחירת מפסידה
+    tieState = {
+      sumA, sumB,
+      tAindex: tAidx, 
+      tBindex: tBidx
+    };
+    showTieModal();
+    return; // נפסיק כאן, נמשיך אחרי בחירת מפסידה
+  }
+
+  recordMatch(winnerIndex, loserIndex, sumA, sumB);
+}
+
+// רישום המשחק בהיסטוריה והחלפת המפסידה בקבוצה ממתינה (אם יש)
+function recordMatch(winnerIndex, loserIndex, goalsA, goalsB, tieWinnerIdx=null) {
+  let matchObj = {
+    matchNumber: matchCount,
+    teamA: activeTeams[0],
+    teamB: activeTeams[1],
+    goalsA,
+    goalsB,
+    winner: winnerIndex,
+    tieWinner: tieWinnerIdx, // למקרה של תיקו
+  };
+  matches.push(matchObj);
+
+  // המפסידה יוצאת, נכנסת אחת מ-waitingTeams (אם יש)
+  if(loserIndex!==null) {
+    if(waitingTeams.length>0) {
+      let wTeam = waitingTeams.shift(); // הבאה בתור
+      if(loserIndex===activeTeams[0]) {
+        activeTeams[0] = wTeam;
+      } else {
+        activeTeams[1] = wTeam;
+      }
+      waitingTeams.push(loserIndex);
+    }
+  }
+
+  updateTeamsTable();
+  updateScorersTable();
+  updateMatchesTable();
+  updateChartData(goalsA+goalsB);
+  renderCurrentMatch();
+}
+
+// ---------------------------------------------------
+//  טיפול בתיקו: מודאל בחירת מפסידה
+// ---------------------------------------------------
+let tieModal = new bootstrap.Modal(document.getElementById("tieModal"));
+let tieTeamAButton = document.getElementById("tieTeamAButton");
+let tieTeamBButton = document.getElementById("tieTeamBButton");
+let tieModalTeams = document.getElementById("tieModalTeams");
+
+function showTieModal() {
+  let tAidx = tieState.tAindex;
+  let tBidx = tieState.tBindex;
+  let tA = teams[tAidx], tB = teams[tBidx];
+  tieModalTeams.textContent = `${tA.name} מול ${tB.name}`;
+  tieTeamAButton.textContent = `מפסידה: ${tA.name}`;
+  tieTeamBButton.textContent = `מפסידה: ${tB.name}`;
+
+  tieModal.show();
+}
+
+tieTeamAButton.addEventListener("click",() => {
+  tieModal.hide();
+  let loserIndex = tieState.tAindex;
+  let winnerIndex = tieState.tBindex;
+  recordMatch(winnerIndex, loserIndex, tieState.sumA, tieState.sumB, winnerIndex);
+  tieState=null;
+});
+tieTeamBButton.addEventListener("click",() => {
+  tieModal.hide();
+  let loserIndex = tieState.tBindex;
+  let winnerIndex = tieState.tAindex;
+  recordMatch(winnerIndex, loserIndex, tieState.sumA, tieState.sumB, winnerIndex);
+  tieState=null;
+});
+
+// ---------------------------------------------------
+//  עדכון טבלת קבוצות מורחבת (W, D, L, GF, GA, GD, pts, rank)
+// ---------------------------------------------------
+function updateTeamsTable() {
+  // קודם למיין לפי נקודות, אחר כך הפרש שערים, וכו'
+  // אבל לא נשנה את המערך הקבוצות עצמו (או שכן), 
+  // נייצר עותק ממוין
+  let sorted = teams.map((t,idx)=>({...t, index:idx}));
+  // מיון: points יורד, GD יורד, GF יורד, index עולה
+  sorted.sort((a,b)=>{
+    if(b.points!==a.points) return b.points - a.points;
+    if(b.gd!==a.gd) return b.gd - a.gd;
+    // אפשר עוד breaker, אבל זה מספיק להדגמה
+    return a.index - b.index;
+  });
+  // קביעת "מיקום" בטבלה
+  sorted.forEach((t,i)=>{
+    t.rank = i+1;
+  });
+
+  let tbody = document.querySelector("#teamsTable tbody");
+  tbody.innerHTML="";
+  sorted.forEach(t=>{
+    let tr = document.createElement("tr");
+    tr.innerHTML=`
+      <td>${t.name}</td>
+      <td>
+        ${t.color}
+        <span style="display:inline-block;width:12px;height:12px;background:${t.color};margin-right:5px;"></span>
+      </td>
+      <td>${t.w}</td>
+      <td>${t.d}</td>
+      <td>${t.l}</td>
+      <td>${t.gf}</td>
+      <td>${t.ga}</td>
+      <td>${t.gd}</td>
+      <td>${t.points}</td>
+      <td>${t.rank}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// ---------------------------------------------------
+//  עדכון טבלת מלך השערים
+// ---------------------------------------------------
+function addGoalsToScorer(name, teamName, goals) {
+  if(!scorers[name]) {
+    scorers[name] = { goals: 0, team: teamName };
+  }
+  scorers[name].goals += goals;
+  scorers[name].team = teamName; // עדכון team למקרה שעבר קבוצה? (נדיר)
+}
+function updateScorersTable() {
+  let arr = Object.keys(scorers).map(k => ({
+    name:k, 
+    goals: scorers[k].goals, 
+    team: scorers[k].team
+  }));
+  arr.sort((a,b)=>b.goals - a.goals);
+  let tb = document.querySelector("#scorersTable tbody");
+  tb.innerHTML="";
+  arr.forEach(s=>{
+    let tr = document.createElement("tr");
+    tr.innerHTML=`
+      <td>${s.name}</td>
+      <td>${s.team}</td>
+      <td>${s.goals}</td>
+    `;
+    tb.appendChild(tr);
+  });
+}
+
+// ---------------------------------------------------
+// היסטוריית משחקים: #, מי שיחק, תוצאה, עולה
+// ---------------------------------------------------
+function updateMatchesTable() {
+  let tb = document.querySelector("#matchesTable tbody");
+  tb.innerHTML="";
+  matches.forEach(m=>{
+    let tA = teams[m.teamA];
+    let tB = teams[m.teamB];
+    let w = (m.winner!==null) ? teams[m.winner].name : null;
+    let tieW = (m.tieWinner!==undefined && m.tieWinner!==null) 
+      ? teams[m.tieWinner].name : null;
+
+    let row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${m.matchNumber}</td>
+      <td>${tA.name} - ${tB.name}</td>
+      <td>${m.goalsA} : ${m.goalsB}</td>
+      <td>${
+        w ? w : (tieW ? "תיקו => " + tieW : "")
+      }</td>
+    `;
+    tb.appendChild(row);
+  });
+}
+
+// ---------------------------------------------------
+//  גרף Chart.js של סך השערים בכל משחק
+// ---------------------------------------------------
+function initChart(){
+  let ctx = document.getElementById("goalsChart");
+  goalsChart = new Chart(ctx, {
+    type:'line',
+    data: chartData,
+    options: {
+      responsive:true,
+      plugins: {
+        title: {
+          display:true,
+          text:'כמות שערים בכל משחק'
+        }
+      }
+    }
+  });
+  chartData.labels=[]; 
+  chartData.datasets[0].data=[];
+  goalsChart.update();
+}
+
+function updateChartData(totalGoals){
+  chartData.labels.push("משחק " + matchCount);
+  chartData.datasets[0].data.push(totalGoals);
+  goalsChart.update();
+}
+
+// ---------------------------------------------------
+//  כפתור סיום טורניר (עובר למסך הסיום)
+// ---------------------------------------------------
+document.getElementById("endTournamentBtn").addEventListener("click", () => {
+  showScreen("screenEnd");
+});
+
+// ---------------------------------------------------
+//  הצגת מסכים
+// ---------------------------------------------------
 function showScreen(screenId) {
   const screens = [
-    "screenEnterPlayers",
+    "screenConfig",
+    "screenPlayers",
     "screenDefineTeams",
-    "screenAssignTeams",
+    "screenAssign",
     "screenTournament",
     "screenEnd"
   ];
@@ -376,388 +871,12 @@ function showScreen(screenId) {
   document.getElementById(screenId).classList.remove("hidden");
 }
 
-/* -------------------------------------------------------------------------
-   3) מסך ראשון: הזנת 18 שמות
--------------------------------------------------------------------------- */
-const goToDefineTeamsBtn = document.getElementById("goToDefineTeamsBtn");
-goToDefineTeamsBtn.addEventListener("click", () => {
-  const txt = document.getElementById("playersInput").value.trim();
-  if (!txt) {
-    alert("לא הוזנו שמות!");
-    return;
-  }
-  const names = txt.split(/[\n,]+/).map(n => n.trim()).filter(n => n);
-  if (names.length !== 18) {
-    alert("חובה להזין בדיוק 18 שמות.");
-    return;
-  }
-  playersPool = names;
-  showScreen("screenDefineTeams");
-});
-
-/* -------------------------------------------------------------------------
-   4) מסך שני: הגדרת שמות וצבעים לכל קבוצה
--------------------------------------------------------------------------- */
-const teamsConfigDiv = document.getElementById("teamsConfig");
-const teamsConfigDoneBtn = document.getElementById("teamsConfigDoneBtn");
-
-// יצירת 3 טפסים (אחד לכל קבוצה)
-function renderTeamsConfig() {
-  teamsConfigDiv.innerHTML = "";
-  teams.forEach((team, i) => {
-    const container = document.createElement("div");
-    container.style.border = "1px solid #eee";
-    container.style.borderRadius = "4px";
-    container.style.margin = "10px 0";
-    container.style.padding = "10px";
-
-    const labelName = document.createElement("label");
-    labelName.textContent = `שם קבוצה #${i+1}:`;
-    const inputName = document.createElement("input");
-    inputName.type = "text";
-    inputName.placeholder = "שם הקבוצה";
-    inputName.value = team.name;
-
-    const labelColor = document.createElement("label");
-    labelColor.textContent = `צבע קבוצה #${i+1}:`;
-    const inputColor = document.createElement("input");
-    inputColor.type = "color";
-    inputColor.value = team.color;
-
-    // עדכון הערכים ב- teams[i]
-    inputName.addEventListener("input", () => {
-      teams[i].name = inputName.value;
-    });
-    inputColor.addEventListener("input", () => {
-      teams[i].color = inputColor.value;
-    });
-
-    container.appendChild(labelName);
-    container.appendChild(inputName);
-    container.appendChild(labelColor);
-    container.appendChild(inputColor);
-    teamsConfigDiv.appendChild(container);
-  });
-}
-renderTeamsConfig();
-
-teamsConfigDoneBtn.addEventListener("click", () => {
-  // בדיקה שכל הקבוצות קיבלו שם (לא ריק)
-  for (let i=0; i<3; i++) {
-    if (!teams[i].name.trim()) {
-      alert(`נא להזין שם לקבוצה מספר ${i+1}`);
-      return;
-    }
-  }
-  showScreen("screenAssignTeams");
-  renderPlayersAssignment();
-});
-
-/* -------------------------------------------------------------------------
-   5) מסך שלישי: חלוקת 18 השחקנים ל-3 הקבוצות
--------------------------------------------------------------------------- */
-const playersPoolDiv = document.getElementById("playersPool");
-document.getElementById("assignTeamsDoneBtn").addEventListener("click", () => {
-  let valid = true;
-  teams.forEach(t => {
-    if (t.players.length !== 6) valid = false;
-  });
-  if (!valid) {
-    alert("חובה לחלק בדיוק 6 שחקנים לכל קבוצה.");
-    return;
-  }
-  // מעבר למסך הטורניר
-  showScreen("screenTournament");
-  // לאיפוס נתונים
-  matchCount = 0;
-  activeTeams = [0,1];
-  waitingTeam = 2;
-
-  updateTeamsTable();
-  updateScorersTable();
-  renderMatchInfo();
-});
-
-function renderPlayersAssignment() {
-  playersPoolDiv.innerHTML = "";
-  // איפוס players בכל קבוצה, למקרה שחוזרים אחורה
-  teams.forEach(t => t.players = []);
-
-  playersPool.forEach(playerName => {
-    const row = document.createElement("div");
-    row.className = "player-row";
-
-    const spanName = document.createElement("span");
-    spanName.textContent = playerName;
-
-    const selectTeam = document.createElement("select");
-    let opts = [
-      { text: "לא מוקצה", value:"none" },
-      { text: teams[0].name, value:"0" },
-      { text: teams[1].name, value:"1" },
-      { text: teams[2].name, value:"2" },
-    ];
-    opts.forEach(o => {
-      let opt = document.createElement("option");
-      opt.value = o.value;
-      opt.textContent = o.text;
-      selectTeam.appendChild(opt);
-    });
-    selectTeam.value = "none";
-
-    selectTeam.addEventListener("change", () => {
-      // נסיר אם הוא כבר רשום בקבוצה אחרת
-      teams.forEach(t => {
-        const idx = t.players.indexOf(playerName);
-        if (idx !== -1) {
-          t.players.splice(idx, 1);
-        }
-      });
-      // נוסיף אם לא 'none'
-      if (selectTeam.value !== "none") {
-        teams[parseInt(selectTeam.value,10)].players.push(playerName);
-      }
-    });
-
-    row.appendChild(spanName);
-    row.appendChild(selectTeam);
-    playersPoolDiv.appendChild(row);
-  });
-}
-
-/* -------------------------------------------------------------------------
-   6) מסך רביעי: הטורניר
--------------------------------------------------------------------------- */
-document.getElementById("submitMatchBtn").addEventListener("click", () => {
-  const goalsA = parseInt(document.getElementById("teamAGoals").value) || 0;
-  const goalsB = parseInt(document.getElementById("teamBGoals").value) || 0;
-
-  const scorersA = document.getElementById("teamAScorers").value
-    .split(",").map(s => s.trim()).filter(s => s);
-  const scorersB = document.getElementById("teamBScorers").value
-    .split(",").map(s => s.trim()).filter(s => s);
-
-  finishMatch(goalsA, goalsB, scorersA, scorersB);
-});
-
-function renderMatchInfo() {
-  let tA = teams[activeTeams[0]];
-  let tB = teams[activeTeams[1]];
-  document.getElementById("currentMatchTitle").textContent = 
-    `(${matchCount + 1}) ${tA.name} נגד ${tB.name}`;
-
-  document.getElementById("labelTeamA").textContent = `שערים (${tA.name}):`;
-  document.getElementById("labelTeamB").textContent = `שערים (${tB.name}):`;
-  document.getElementById("teamAName").textContent = tA.name;
-  document.getElementById("teamBName").textContent = tB.name;
-
-  document.getElementById("teamAGoals").value = 0;
-  document.getElementById("teamBGoals").value = 0;
-  document.getElementById("teamAScorers").value = "";
-  document.getElementById("teamBScorers").value = "";
-}
-
-function finishMatch(goalsA, goalsB, scorersA, scorersB) {
-  matchCount++;
-
-  // עדכון מלך השערים
-  let tAIndex = activeTeams[0];
-  let tBIndex = activeTeams[1];
-  let tA = teams[tAIndex];
-  let tB = teams[tBIndex];
-
-  scorersA.forEach(name => addGoal(name, tA.name));
-  scorersB.forEach(name => addGoal(name, tB.name));
-
-  if (goalsA === goalsB) {
-    // תיקו: נקודה לכל אחת
-    tA.points++;
-    tB.points++;
-    tieState = {
-      tAIndex, tBIndex,
-      goalsA, goalsB
-    };
-    showTiePanel(); // מציג חלון בחירת המפסידה
-  } else {
-    let loserIndex;
-    if (goalsA > goalsB) {
-      tA.points += 3 - 1; // כי בפועל הוספנו 0, אז מוסיפים 3
-      loserIndex = tBIndex;
-    } else {
-      tB.points += 3 - 1;
-      loserIndex = tAIndex;
-    }
-    recordMatchAndSwap({
-      matchNumber: matchCount,
-      tA: tAIndex,
-      tB: tBIndex,
-      goalsA,
-      goalsB,
-      winner: (goalsA > goalsB ? tAIndex : tBIndex)
-    }, loserIndex);
-  }
-}
-
-// חלון תיקו (tiePanel)
-function showTiePanel() {
-  document.getElementById("tiePanel").style.display = "flex";
-  let tA = teams[tieState.tAIndex];
-  let tB = teams[tieState.tBIndex];
-  document.getElementById("tieTeamsText").textContent = `${tA.name} מול ${tB.name}`;
-
-  let btnA = document.getElementById("tieTeamAButton");
-  btnA.textContent = `המפסידה: ${tA.name}`;
-  btnA.onclick = () => handleTieChoice(tieState.tAIndex);
-
-  let btnB = document.getElementById("tieTeamBButton");
-  btnB.textContent = `המפסידה: ${tB.name}`;
-  btnB.onclick = () => handleTieChoice(tieState.tBIndex);
-}
-
-// בחירת הקבוצה שהפסידה בתיקו
-function handleTieChoice(loserIndex) {
-  document.getElementById("tiePanel").style.display = "none";
-  // שומרים מידע בהיסטוריה
-  let mObj = {
-    matchNumber: matchCount,
-    tA: tieState.tAIndex,
-    tB: tieState.tBIndex,
-    goalsA: tieState.goalsA,
-    goalsB: tieState.goalsB,
-    winner: null, // כי תיקו
-    winnerAfterTie: (loserIndex === tieState.tAIndex ? tieState.tBIndex : tieState.tAIndex)
-  };
-  recordMatchAndSwap(mObj, loserIndex);
-  tieState = null;
-}
-
-// פעולת סגירת משחק (החלפה והוספה להיסטוריה)
-function recordMatchAndSwap(matchObj, loserIndex) {
-  matches.push(matchObj);
-  updateMatchesHistory();
-
-  if (loserIndex === activeTeams[0]) {
-    activeTeams[0] = waitingTeam;
-    waitingTeam = loserIndex;
-  } else if (loserIndex === activeTeams[1]) {
-    activeTeams[1] = waitingTeam;
-    waitingTeam = loserIndex;
-  }
-  updateTeamsTable();
-  updateScorersTable();
-  renderMatchInfo();
-}
-
-/* -------------------------------------------------------------------------
-   7) פונקציות עזר נוספות
--------------------------------------------------------------------------- */
-function addGoal(playerName, teamName) {
-  if (!scorers[playerName]) {
-    scorers[playerName] = { goals: 1, team: teamName };
-  } else {
-    scorers[playerName].goals++;
-  }
-}
-
-function updateTeamsTable() {
-  const tbody = document.querySelector("#teamsTable tbody");
-  tbody.innerHTML = "";
-  teams.forEach(team => {
-    let tr = document.createElement("tr");
-    let tdName = document.createElement("td");
-    tdName.textContent = team.name;
-
-    let tdColor = document.createElement("td");
-    tdColor.textContent = team.color;
-    let colorBox = document.createElement("span");
-    colorBox.className = "teamColorBox";
-    colorBox.style.backgroundColor = team.color;
-    tdColor.appendChild(colorBox);
-
-    let tdPoints = document.createElement("td");
-    tdPoints.textContent = team.points;
-
-    tr.appendChild(tdName);
-    tr.appendChild(tdColor);
-    tr.appendChild(tdPoints);
-    tbody.appendChild(tr);
-  });
-}
-
-function updateScorersTable() {
-  const scorersBody = document.querySelector("#scorersTable tbody");
-  scorersBody.innerHTML = "";
-  let arr = Object.keys(scorers).map(name => ({
-    name,
-    goals: scorers[name].goals,
-    team: scorers[name].team
-  }));
-  // מיון יורד לפי שערים
-  arr.sort((a,b) => b.goals - a.goals);
-
-  arr.forEach(s => {
-    let tr = document.createElement("tr");
-    let tdName = document.createElement("td");
-    let tdTeam = document.createElement("td");
-    let tdGoals= document.createElement("td");
-
-    tdName.textContent = s.name;
-    tdTeam.textContent = s.team;
-    tdGoals.textContent = s.goals;
-
-    tr.appendChild(tdName);
-    tr.appendChild(tdTeam);
-    tr.appendChild(tdGoals);
-    scorersBody.appendChild(tr);
-  });
-}
-
-function updateMatchesHistory() {
-  const tb = document.getElementById("matchesHistoryBody");
-  tb.innerHTML = "";
-  matches.forEach(m => {
-    let tr = document.createElement("tr");
-
-    let tdIndex = document.createElement("td");
-    tdIndex.textContent = m.matchNumber;
-
-    let tA = teams[m.tA];
-    let tB = teams[m.tB];
-
-    let tdMatch = document.createElement("td");
-    tdMatch.textContent = `${tA.name} - ${tB.name}`;
-
-    let tdScore = document.createElement("td");
-    tdScore.textContent = `${m.goalsA} : ${m.goalsB}`;
-
-    let tdAdvance = document.createElement("td");
-    if (m.winner === null) {
-      let w = (m.winnerAfterTie !== undefined) ? teams[m.winnerAfterTie].name : "?";
-      tdAdvance.textContent = `תיקו => ${w}`;
-    } else {
-      tdAdvance.textContent = teams[m.winner].name;
-    }
-
-    tr.appendChild(tdIndex);
-    tr.appendChild(tdMatch);
-    tr.appendChild(tdScore);
-    tr.appendChild(tdAdvance);
-    tb.appendChild(tr);
-  });
-}
-
-/* -------------------------------------------------------------------------
-   8) כפתור סיום הטורניר (עובר למסך חמישי)
--------------------------------------------------------------------------- */
-document.getElementById("endTournamentBtn").addEventListener("click", () => {
-  showScreen("screenEnd");
-});
-
-/* -------------------------------------------------------------------------
-   9) בעת טעינת העמוד, נפתח במסך הראשון
--------------------------------------------------------------------------- */
+// ---------------------------------------------------
+//  טעינה ראשונית
+// ---------------------------------------------------
 window.addEventListener("load", () => {
-  showScreen("screenEnterPlayers");
+  // התחל במסך הגדרת טורניר
+  showScreen("screenConfig");
 });
 </script>
 
