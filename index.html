@@ -1,20 +1,20 @@
 <!DOCTYPE html>
-<html lang="he">
+<html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>טורניר כדורגל - המפסיד יוצא (מורחב)</title>
+  <title>ניהול טורניר כדורגל | המפסיד יוצא</title>
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700&family=Roboto+Mono:wght@500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
   <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   
   <!-- Bootstrap Icons -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -24,52 +24,173 @@
 
   <style>
     :root {
-      --primary-color: #007bff;
-      --primary-color-rgb: 0, 123, 255;
-      --secondary-color: #6c757d;
-      --background-color: #f5f5f5;
-      --text-color: #333;
-      --card-bg: #ffffff;
-      --timer-color: #28a745;
-      --timer-warning-color: #ffc107;
-      --timer-danger-color: #dc3545;
+      /* Primary Colors */
+      --primary-color: #3B82F6;
+      --primary-color-rgb: 59, 130, 246;
+      --primary-dark: #2563EB;
+      --primary-light: #60A5FA;
+      
+      /* Secondary Colors */
+      --secondary-color: #10B981;
+      --secondary-dark: #059669;
+      --secondary-light: #34D399;
+      
+      /* Neutral Colors */
+      --background-color: #F3F4F6;
+      --surface-color: #FFFFFF;
+      --text-color: #1F2937;
+      --text-muted: #6B7280;
+      
+      /* Timer Colors */
+      --timer-color: #10B981;
+      --timer-warning: #F59E0B;
+      --timer-danger: #EF4444;
+      
+      /* Card & Container */
+      --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --card-radius: 1rem;
+      --container-max-width: 1200px;
+
+      /* Transitions */
+      --transition-fast: 150ms ease;
+      --transition-normal: 250ms ease;
+      --transition-slow: 350ms ease;
     }
 
     [data-theme="dark"] {
-      --primary-color: #0d6efd;
-      --primary-color-rgb: 13, 110, 253;
-      --secondary-color: #adb5bd;
-      --background-color: #212529;
-      --text-color: #f8f9fa;
-      --card-bg: #2b3035;
-      --timer-color: #198754;
-      --timer-warning-color: #ffc107;
-      --timer-danger-color: #dc3545;
+      /* Dark Mode Colors */
+      --primary-color: #60A5FA;
+      --primary-color-rgb: 96, 165, 250;
+      --primary-dark: #3B82F6;
+      --primary-light: #93C5FD;
+      
+      --secondary-color: #34D399;
+      --secondary-dark: #10B981;
+      --secondary-light: #6EE7B7;
+      
+      --background-color: #1F2937;
+      --surface-color: #374151;
+      --text-color: #F9FAFB;
+      --text-muted: #9CA3AF;
+      
+      --timer-color: #34D399;
+      --timer-warning: #FBBF24;
+      --timer-danger: #F87171;
+      
+      --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
     }
 
+    /* Base Styles */
     body {
-      direction: rtl;
-      font-family: 'Heebo', Arial, sans-serif;
+      font-family: 'Rubik', sans-serif;
       background: var(--background-color);
       color: var(--text-color);
-      transition: all 0.3s ease;
+      line-height: 1.6;
+      transition: background-color var(--transition-normal), color var(--transition-normal);
+      min-height: 100vh;
     }
 
+    /* Navigation Bar */
+    .navbar {
+      background: var(--surface-color);
+      box-shadow: var(--card-shadow);
+      padding: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .navbar-brand {
+      font-weight: 600;
+      font-size: 1.25rem;
+      color: var(--primary-color);
+    }
+
+    /* Cards & Containers */
     .card {
-      background: var(--card-bg);
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      transition: transform 0.3s ease;
+      background: var(--surface-color);
+      border: none;
+      border-radius: var(--card-radius);
+      box-shadow: var(--card-shadow);
+      transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+      overflow: hidden;
     }
 
     .card:hover {
       transform: translateY(-2px);
+      box-shadow: 0 8px 12px -1px rgba(0, 0, 0, 0.15), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     }
 
+    .container {
+      max-width: var(--container-max-width);
+      padding: 1rem;
+    }
+
+    /* Forms & Inputs */
+    .form-control, .form-select {
+      border-radius: 0.75rem;
+      border: 2px solid var(--text-muted);
+      padding: 0.75rem 1rem;
+      transition: all var(--transition-fast);
+      background: var(--surface-color);
+      color: var(--text-color);
+    }
+
+    .form-control:focus, .form-select:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(var(--primary-color-rgb), 0.2);
+    }
+
+    /* Buttons */
+    .btn {
+      border-radius: 0.75rem;
+      padding: 0.75rem 1.5rem;
+      font-weight: 500;
+      transition: all var(--transition-fast);
+      text-transform: none;
+      letter-spacing: 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 120%;
+      height: 120%;
+      background: rgba(255, 255, 255, 0.2);
+      transform: translate(-50%, -50%) scale(0);
+      border-radius: 50%;
+      transition: transform var(--transition-fast);
+    }
+
+    .btn:active::after {
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    .btn-primary {
+      background: var(--primary-color);
+      border: none;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+    }
+
+    .btn-success {
+      background: var(--secondary-color);
+      border: none;
+    }
+
+    .btn-success:hover {
+      background: var(--secondary-dark);
+    }
+
+    /* Screen Transitions */
     .screen {
       opacity: 0;
       transform: translateY(20px);
-      transition: all 0.4s ease-in-out;
+      transition: opacity var(--transition-normal), transform var(--transition-normal);
       display: none;
     }
 
@@ -78,75 +199,34 @@
       transform: translateY(0);
       display: block;
     }
-
-    .team-container {
-      min-height: 100px;
-      border: 2px dashed var(--primary-color);
-      padding: 10px;
-      margin: 10px 0;
-      border-radius: 4px;
-      background: rgba(var(--primary-color-rgb), 0.05);
-      transition: all 0.3s ease;
-    }
-
-    .draggable-player {
-      padding: 8px 12px;
-      margin: 4px 0;
-      background: var(--card-bg);
-      border: 1px solid var(--secondary-color);
-      border-radius: 4px;
-      cursor: move;
-      transition: all 0.2s ease;
-      user-select: none;
-    }
-
-    .draggable-player:hover {
-      background: var(--secondary-color);
-      color: white;
-      transform: translateY(-2px);
-    }
-
-    .sortable-ghost {
-      opacity: 0.4;
-      background-color: var(--primary-color) !important;
-    }
-
-    .sortable-drag {
-      opacity: 0.8;
-      cursor: move;
-    }
-
-    .team-container.sortable-dragover {
-      background: rgba(var(--primary-color-rgb), 0.2);
-      border-style: solid;
-    }
-
+    /* Timer Styles */
     .match-timer-container {
-      background: var(--card-bg);
-      padding: 1.5rem;
-      border-radius: 12px;
+      background: var(--surface-color);
+      border-radius: var(--card-radius);
+      padding: 2rem;
       text-align: center;
+      box-shadow: var(--card-shadow);
       margin-bottom: 2rem;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
 
     .match-timer {
-      font-family: 'Roboto Mono', monospace;
-      font-size: 4rem;
-      font-weight: bold;
+      font-family: 'Rubik', monospace;
+      font-size: 5rem;
+      font-weight: 700;
       color: var(--timer-color);
-      text-shadow: 0 0 10px rgba(var(--primary-color-rgb), 0.2);
-      transition: all 0.3s ease;
-      margin-bottom: 1rem;
+      text-shadow: 0 0 20px rgba(var(--primary-color-rgb), 0.2);
+      transition: all var(--transition-normal);
+      margin-bottom: 1.5rem;
+      line-height: 1;
     }
 
     .match-timer.warning {
-      color: var(--timer-warning-color);
+      color: var(--timer-warning);
       animation: pulse 1s infinite;
     }
 
     .match-timer.extra-time {
-      color: var(--timer-danger-color);
+      color: var(--timer-danger);
       animation: pulse 1s infinite;
     }
 
@@ -154,6 +234,138 @@
       animation: endGame 0.5s infinite alternate;
     }
 
+    .timer-controls {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .timer-controls .btn {
+      min-width: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 1rem 1.5rem;
+    }
+
+    .timer-controls .btn i {
+      font-size: 1.25rem;
+    }
+
+    /* Team & Player Styles */
+    .team-container {
+      min-height: 120px;
+      border: 2px dashed var(--primary-color);
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: var(--card-radius);
+      background: rgba(var(--primary-color-rgb), 0.05);
+      transition: all var(--transition-normal);
+    }
+
+    .team-container:hover {
+      border-style: solid;
+      background: rgba(var(--primary-color-rgb), 0.1);
+    }
+
+    .draggable-player {
+      padding: 1rem;
+      margin: 0.5rem 0;
+      background: var(--surface-color);
+      border: 1px solid var(--text-muted);
+      border-radius: 0.75rem;
+      cursor: move;
+      transition: all var(--transition-fast);
+      user-select: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .draggable-player:hover {
+      background: var(--primary-color);
+      color: white;
+      border-color: var(--primary-color);
+      transform: translateX(-4px);
+    }
+
+    .draggable-player .player-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .sortable-ghost {
+      opacity: 0.4;
+      background: var(--primary-color) !important;
+      border: 2px dashed var(--primary-color);
+    }
+
+    .sortable-drag {
+      opacity: 0.8;
+      cursor: move;
+    }
+
+    /* Tables */
+    .table-container {
+      background: var(--surface-color);
+      border-radius: var(--card-radius);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: var(--card-shadow);
+    }
+
+    .table {
+      margin: 0;
+      color: var(--text-color);
+    }
+
+    .table th {
+      background: rgba(var(--primary-color-rgb), 0.1);
+      color: var(--text-color);
+      font-weight: 600;
+      padding: 1rem;
+      border-bottom: 2px solid var(--primary-color);
+    }
+
+    .table td {
+      padding: 1rem;
+      vertical-align: middle;
+      border-bottom: 1px solid rgba(var(--primary-color-rgb), 0.2);
+    }
+
+    .table tbody tr:hover {
+      background: rgba(var(--primary-color-rgb), 0.05);
+    }
+
+    /* Dark Mode Toggle */
+    .dark-mode-toggle {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      z-index: 1000;
+      width: 3.5rem;
+      height: 3.5rem;
+      border-radius: 50%;
+      background: var(--surface-color);
+      border: none;
+      box-shadow: var(--card-shadow);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: all var(--transition-normal);
+    }
+
+    .dark-mode-toggle:hover {
+      transform: rotate(15deg);
+      box-shadow: 0 8px 12px -1px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Animations */
     @keyframes pulse {
       0% { transform: scale(1); opacity: 1; }
       50% { transform: scale(1.05); opacity: 0.8; }
@@ -164,279 +376,329 @@
       from { transform: scale(1); }
       to { transform: scale(1.1); }
     }
-    .dark-mode-toggle {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      z-index: 1000;
-      padding: 10px;
-      border-radius: 50%;
-      width: 45px;
-      height: 45px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.3s ease;
-    }
 
-    .table-container {
-      background: var(--card-bg);
-      border-radius: 8px;
-      padding: 15px;
-      margin-bottom: 20px;
-    }
-
-    .table th {
-      background-color: var(--background-color);
-      color: var(--text-color);
-    }
-
-    .table td {
-      color: var(--text-color);
-    }
-
-    .timer-controls {
-      display: flex;
-      gap: 10px;
-      justify-content: center;
-    }
-
-    .timer-controls .btn {
-      min-width: 100px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 5px;
-    }
-
-    .timer-controls .btn i {
-      font-size: 1.2em;
-    }
-
-    .timer-controls .btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-
+    /* Responsive Design */
     @media (max-width: 768px) {
       .container {
-        padding: 10px;
+        padding: 0.5rem;
       }
       
-      .team-container {
-        margin: 5px 0;
-      }
-      
-      .btn {
-        width: 100%;
-        margin: 5px 0;
-      }
-
-      .table-responsive {
-        font-size: 0.9em;
-      }
-
       .match-timer {
-        font-size: 3rem;
+        font-size: 3.5rem;
       }
-
+      
       .timer-controls {
         flex-direction: column;
       }
-
+      
       .timer-controls .btn {
         width: 100%;
+      }
+
+      .table-responsive {
+        margin: 0 -1rem;
+        padding: 0 1rem;
+        overflow-x: auto;
+      }
+      
+      .table td, .table th {
+        white-space: nowrap;
+        padding: 0.75rem;
+      }
+
+      .draggable-player {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .player-controls {
+        margin-top: 0.5rem;
       }
     }
   </style>
 </head>
-<body>
-
-<!-- Navigation Bar -->
-<nav class="navbar navbar-dark bg-primary">
+<body class="bg-light">
+  <!-- Navigation Bar -->
+<nav class="navbar">
   <div class="container-fluid">
-    <button class="btn btn-danger" id="endTournamentBtn">
-      סיום טורניר
-    </button>
-    <span class="navbar-brand">ניהול טורניר - המפסיד יוצא</span>
-    <button class="btn btn-warning" id="installBtn" style="display: none;">
-      התקן (PWA)
-    </button>
+    <div class="d-flex w-100 align-items-center justify-content-between">
+      <button class="btn btn-danger" id="endTournamentBtn">
+        <i class="bi bi-x-circle-fill me-2"></i>
+        סיום טורניר
+      </button>
+      <span class="navbar-brand">
+        <i class="bi bi-trophy-fill me-2"></i>
+        ניהול טורניר כדורגל
+      </span>
+      <button class="btn btn-warning" id="installBtn" style="display: none;">
+        <i class="bi bi-download me-2"></i>
+        התקן
+      </button>
+    </div>
   </div>
 </nav>
 
-<div class="container mt-4">
+<div class="container">
   <!-- Screen 1: Tournament Configuration -->
   <div id="screenConfig" class="screen">
-    <div class="card p-4">
-      <h2 class="mb-4">הגדרת הטורניר</h2>
-      <form id="configForm" class="needs-validation" novalidate>
-        <div class="mb-3">
-          <label class="form-label">מספר קבוצות:</label>
-          <input type="number" class="form-control" id="numTeamsInput" 
-                 min="2" value="3" required>
-          <div class="invalid-feedback">
-            נא להזין מספר קבוצות תקין (מינימום 2)
-          </div>
+    <div class="card">
+      <div class="card-body p-4">
+        <div class="text-center mb-4">
+          <i class="bi bi-gear-fill text-primary" style="font-size: 3rem;"></i>
+          <h2 class="mt-3">הגדרת הטורניר</h2>
+          <p class="text-muted">הגדר את מספר הקבוצות והשחקנים בטורניר</p>
         </div>
-        <div class="mb-3">
-          <label class="form-label">מספר שחקנים בכל קבוצה:</label>
-          <input type="number" class="form-control" id="playersPerTeamInput"
-                 min="1" value="6" required>
-          <div class="invalid-feedback">
-            נא להזין מספר שחקנים תקין (מינימום 1)
+        <form id="configForm" class="needs-validation" novalidate>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">
+                <i class="bi bi-people-fill me-2"></i>
+                מספר קבוצות
+              </label>
+              <input type="number" 
+                     class="form-control form-control-lg" 
+                     id="numTeamsInput" 
+                     min="2" 
+                     value="3" 
+                     required>
+              <div class="invalid-feedback">
+                נא להזין מספר קבוצות תקין (מינימום 2)
+              </div>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">
+                <i class="bi bi-person-fill me-2"></i>
+                מספר שחקנים בכל קבוצה
+              </label>
+              <input type="number" 
+                     class="form-control form-control-lg" 
+                     id="playersPerTeamInput"
+                     min="1" 
+                     value="6" 
+                     required>
+              <div class="invalid-feedback">
+                נא להזין מספר שחקנים תקין (מינימום 1)
+              </div>
+            </div>
           </div>
-        </div>
-        <button type="submit" class="btn btn-primary">המשך</button>
-      </form>
+          <div class="text-center mt-4">
+            <button type="submit" class="btn btn-primary btn-lg">
+              <i class="bi bi-arrow-left me-2"></i>
+              המשך להזנת שחקנים
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 
   <!-- Screen 2: Player Names -->
   <div id="screenPlayers" class="screen">
-    <div class="card p-4">
-      <h3 class="mb-4">הזן <span id="totalPlayersSpan">18</span> שמות שחקנים</h3>
-      <form id="playersForm" class="needs-validation" novalidate>
-  <div class="mb-3">
-    <textarea id="playersInput" rows="6" class="form-control"
-              placeholder="הקלד שמות שחקנים, מופרדים בפסיק או שורה חדשה"
-              required></textarea>
-    <div class="invalid-feedback">
-      נא להזין את כל שמות השחקנים
-    </div>
-  </div>
-  <button type="submit" class="btn btn-success">הגדר קבוצות</button>
-</form>
-    </div>
-  </div>
-  <!-- Screen 3: Team Definition -->
-  <div id="screenDefineTeams" class="screen">
-    <div class="card p-4">
-      <h3 class="mb-4">הגדרת הקבוצות</h3>
-      <div id="teamsDefinition"></div>
-      <button class="btn btn-primary mt-3" id="teamsDefinitionDoneBtn">
-        המשך לחלוקת שחקנים
-      </button>
+    <div class="card">
+      <div class="card-body p-4">
+        <div class="text-center mb-4">
+          <i class="bi bi-person-plus-fill text-primary" style="font-size: 3rem;"></i>
+          <h2 class="mt-3">הזנת שמות שחקנים</h2>
+          <p class="text-muted">
+            נא להזין <span id="totalPlayersSpan" class="badge bg-primary">18</span> שמות שחקנים
+          </p>
+        </div>
+        <form id="playersForm" class="needs-validation" novalidate>
+          <div class="mb-4">
+            <textarea id="playersInput" 
+                      rows="8" 
+                      class="form-control form-control-lg"
+                      placeholder="הקלד שמות שחקנים, מופרדים בפסיק או שורה חדשה"
+                      required></textarea>
+            <div class="form-text text-muted">
+              לדוגמה: משה כהן, דוד לוי, יוסף מזרחי
+            </div>
+            <div class="invalid-feedback">
+              נא להזין את כל שמות השחקנים
+            </div>
+          </div>
+          <div class="text-center">
+            <button type="submit" class="btn btn-success btn-lg">
+              <i class="bi bi-arrow-left me-2"></i>
+              המשך להגדרת קבוצות
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 
+  <!-- Screen 3: Team Definition -->
+  <div id="screenDefineTeams" class="screen">
+    <div class="card">
+      <div class="card-body p-4">
+        <div class="text-center mb-4">
+          <i class="bi bi-flag-fill text-primary" style="font-size: 3rem;"></i>
+          <h2 class="mt-3">הגדרת הקבוצות</h2>
+          <p class="text-muted">הגדר שם וצבע לכל קבוצה</p>
+        </div>
+        <div id="teamsDefinition" class="mb-4"></div>
+        <div class="text-center">
+          <button class="btn btn-primary btn-lg" id="teamsDefinitionDoneBtn">
+            <i class="bi bi-arrow-left me-2"></i>
+            המשך לחלוקת שחקנים
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
   <!-- Screen 4: Player Assignment -->
   <div id="screenAssign" class="screen">
-    <div class="card p-4">
-      <h3 class="mb-4">חלוקת שחקנים לקבוצות</h3>
-      <div class="row">
-        <div class="col-md-4">
-          <h5>שחקנים לא משובצים</h5>
-          <div id="unassignedPlayers" class="team-container"></div>
+    <div class="card">
+      <div class="card-body p-4">
+        <div class="text-center mb-4">
+          <i class="bi bi-diagram-3-fill text-primary" style="font-size: 3rem;"></i>
+          <h2 class="mt-3">חלוקת שחקנים לקבוצות</h2>
+          <p class="text-muted">גרור את השחקנים לקבוצות המתאימות</p>
         </div>
-        <div class="col-md-8" id="teamContainers"></div>
+        <div class="row">
+          <div class="col-md-4">
+            <div class="unassigned-container">
+              <h5>
+                <i class="bi bi-person-lines-fill me-2"></i>
+                שחקנים לא משובצים
+              </h5>
+              <div id="unassignedPlayers" class="team-container"></div>
+            </div>
+          </div>
+          <div class="col-md-8" id="teamContainers"></div>
+        </div>
+        <div class="text-center mt-4">
+          <button class="btn btn-primary btn-lg" id="finishAssignBtn" disabled>
+            <i class="bi bi-arrow-left me-2"></i>
+            המשך לטורניר
+          </button>
+        </div>
       </div>
-      <button class="btn btn-primary mt-3" id="finishAssignBtn">
-        סיום החלוקה
-      </button>
     </div>
   </div>
 
   <!-- Screen 5: Tournament Management -->
   <div id="screenTournament" class="screen">
-    <div class="card p-4">
-      <h3 class="mb-4">ניהול הטורניר</h3>
-
-      <!-- Match Timer -->
-      <div class="match-timer-container">
-        <div class="match-timer" id="matchTimer">00:00</div>
-        <div class="timer-controls">
-          <button class="btn btn-success" id="startTimerBtn">
-            <i class="bi bi-play-fill"></i>
-            התחל
-          </button>
-          <button class="btn btn-warning" id="pauseTimerBtn" disabled>
-            <i class="bi bi-pause-fill"></i>
-            עצור
-          </button>
-          <button class="btn btn-danger" id="resetTimerBtn">
-            <i class="bi bi-arrow-counterclockwise"></i>
-            אפס
-          </button>
+    <div class="card mb-4">
+      <div class="card-body p-4">
+        <div class="text-center mb-4">
+          <i class="bi bi-stopwatch-fill text-primary" style="font-size: 3rem;"></i>
+          <h2 class="mt-3">ניהול המשחק</h2>
         </div>
-      </div>
-      
-      <!-- Teams Table -->
-      <div class="table-container">
-        <h5>טבלת הקבוצות</h5>
-        <div class="table-responsive">
-          <table class="table table-bordered">
-            <thead>
-              <tr>
-                <th>קבוצה</th>
-                <th>צבע</th>
-                <th>נצ'</th>
-                <th>תיקו</th>
-                <th>הפ'</th>
-                <th>שע' בעד</th>
-                <th>שע' נגד</th>
-                <th>הפרש</th>
-                <th>נק'</th>
-                <th>דירוג</th>
-              </tr>
-            </thead>
-            <tbody id="teamsTableBody"></tbody>
-          </table>
-        </div>
-      </div>
 
-      <!-- Current Match -->
-      <div class="card mb-4">
-        <div class="card-body">
-          <h5 id="currentMatchTitle" class="card-title mb-3">משחק נוכחי</h5>
+        <!-- Match Timer -->
+        <div class="match-timer-container">
+          <div id="matchTimer" class="match-timer">00:00</div>
+          <div class="timer-controls">
+            <button class="btn btn-success" id="startTimerBtn">
+              <i class="bi bi-play-fill"></i>
+              התחל
+            </button>
+            <button class="btn btn-warning" id="pauseTimerBtn" disabled>
+              <i class="bi bi-pause-fill"></i>
+              עצור
+            </button>
+            <button class="btn btn-danger" id="resetTimerBtn">
+              <i class="bi bi-arrow-counterclockwise"></i>
+              אפס
+            </button>
+          </div>
+        </div>
+
+        <!-- Current Match -->
+        <div class="current-match-container">
+          <h5 id="currentMatchTitle" class="text-center mb-3"></h5>
           <div class="row" id="currentMatchTeams"></div>
           <div class="text-center mt-3">
-            <button class="btn btn-success" id="submitMatchBtn">סיים משחק</button>
+            <button class="btn btn-success btn-lg" id="submitMatchBtn">
+              <i class="bi bi-check-circle-fill me-2"></i>
+              סיים משחק
+            </button>
           </div>
         </div>
       </div>
+    </div>
 
-      <!-- Top Scorers -->
-      <div class="table-container">
-        <h5>מלך השערים</h5>
-        <div class="table-responsive">
-          <table class="table table-bordered">
-            <thead>
-              <tr>
-                <th>שחקן</th>
-                <th>קבוצה</th>
-                <th>שערים</th>
-              </tr>
-            </thead>
-            <tbody id="scorersTableBody"></tbody>
-          </table>
-        </div>
+    <!-- Teams Table -->
+    <div class="table-container">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="mb-0">
+          <i class="bi bi-table me-2"></i>
+          טבלת הקבוצות
+        </h5>
       </div>
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>קבוצה</th>
+              <th>צבע</th>
+              <th>נצ'</th>
+              <th>תיקו</th>
+              <th>הפ'</th>
+              <th>בעד</th>
+              <th>נגד</th>
+              <th>הפרש</th>
+              <th>נק'</th>
+              <th>דירוג</th>
+            </tr>
+          </thead>
+          <tbody id="teamsTableBody"></tbody>
+        </table>
+      </div>
+    </div>
 
-      <!-- Match History -->
-      <div class="table-container">
-        <h5>היסטוריית משחקים</h5>
-        <div class="table-responsive">
-          <table class="table table-bordered">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>קבוצות</th>
-                <th>תוצאה</th>
-                <th>מנצחת</th>
-              </tr>
-            </thead>
-            <tbody id="matchesTableBody"></tbody>
-          </table>
-        </div>
+    <!-- Top Scorers -->
+    <div class="table-container">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="mb-0">
+          <i class="bi bi-trophy-fill me-2"></i>
+          מלך השערים
+        </h5>
+      </div>
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>שחקן</th>
+              <th>קבוצה</th>
+              <th>שערים</th>
+            </tr>
+          </thead>
+          <tbody id="scorersTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Match History -->
+    <div class="table-container">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="mb-0">
+          <i class="bi bi-clock-history me-2"></i>
+          היסטוריית משחקים
+        </h5>
+      </div>
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>קבוצות</th>
+              <th>תוצאה</th>
+              <th>מנצחת</th>
+            </tr>
+          </thead>
+          <tbody id="matchesTableBody"></tbody>
+        </table>
       </div>
     </div>
   </div>
 </div>
 
 <!-- Dark Mode Toggle -->
-<button class="btn btn-outline-primary dark-mode-toggle" id="darkModeToggle">
-  🌓
+<button class="dark-mode-toggle" id="darkModeToggle" title="שינוי מצב תצוגה">
+  <i class="bi bi-moon-fill"></i>
 </button>
 
 <!-- Scripts -->
@@ -472,8 +734,6 @@ function validateForm(form) {
     return false;
   }
 
-  console.log('Validating form:', form.id); // לבדיקה
-
   if (!form.checkValidity()) {
     form.classList.add('was-validated');
     return false;
@@ -482,13 +742,26 @@ function validateForm(form) {
 }
 
 // Screen Management
+let currentScreen = 'screenConfig';
+
 function showScreen(screenId) {
+  console.log(`Switching to screen: ${screenId}`);
   document.querySelectorAll('.screen').forEach(screen => {
+    screen.style.display = 'none';
     screen.classList.remove('active');
   });
   
   const targetScreen = document.getElementById(screenId);
-  targetScreen.classList.add('active');
+  if (targetScreen) {
+    targetScreen.style.display = 'block';
+    setTimeout(() => {
+      targetScreen.classList.add('active');
+    }, 10);
+    currentScreen = screenId;
+    saveCurrentState();
+  } else {
+    console.error(`Screen ${screenId} not found!`);
+  }
 }
 
 // Dark Mode Management
@@ -497,6 +770,8 @@ const darkModeToggle = document.getElementById('darkModeToggle');
 function initializeDarkMode() {
   const savedTheme = localStorage.getItem('theme') || 'light';
   document.documentElement.setAttribute('data-theme', savedTheme);
+  darkModeToggle.querySelector('i').className = 
+    savedTheme === 'dark' ? 'bi bi-sun-fill' : 'bi bi-moon-fill';
   
   darkModeToggle.addEventListener('click', () => {
     const currentTheme = document.documentElement.getAttribute('data-theme');
@@ -504,10 +779,12 @@ function initializeDarkMode() {
     
     document.documentElement.setAttribute('data-theme', newTheme);
     localStorage.setItem('theme', newTheme);
+    darkModeToggle.querySelector('i').className = 
+      newTheme === 'dark' ? 'bi bi-sun-fill' : 'bi bi-moon-fill';
   });
 }
 
-// Match Timer Management
+// Timer Management
 function initializeMatchTimer() {
   const timerDisplay = document.getElementById('matchTimer');
   const startBtn = document.getElementById('startTimerBtn');
@@ -515,7 +792,9 @@ function initializeMatchTimer() {
   const resetBtn = document.getElementById('resetTimerBtn');
 
   function playAlarm() {
-    alarmSound.play();
+    alarmSound.play().catch(error => {
+      console.log('Auto-play prevented:', error);
+    });
   }
 
   function updateTimerDisplay() {
@@ -523,36 +802,40 @@ function initializeMatchTimer() {
     const seconds = (matchTimeSeconds % 60).toString().padStart(2, '0');
     timerDisplay.textContent = `${minutes}:${seconds}`;
 
-    // בדיקת זמנים להשמעת התראות
-    if (matchTimeSeconds === MATCH_DURATION - WARNING_TIME) { // דקה לפני הסיום
+    // Alert States
+    if (matchTimeSeconds === MATCH_DURATION - WARNING_TIME) {
       playAlarm();
       timerDisplay.classList.add('warning');
     }
-    else if (matchTimeSeconds === MATCH_DURATION) { // סיום 8 דקות
+    else if (matchTimeSeconds === MATCH_DURATION) {
       playAlarm();
       timerDisplay.classList.remove('warning');
       timerDisplay.classList.add('extra-time');
       isExtraTime = true;
     }
-    else if (isExtraTime && matchTimeSeconds === MATCH_DURATION + EXTRA_TIME) { // סיום דקת הארכה
+    else if (isExtraTime && matchTimeSeconds === MATCH_DURATION + EXTRA_TIME) {
       playAlarm();
       pauseTimer();
       timerDisplay.classList.add('end');
-      alert('סיום המשחק!');
+      showGameEndModal();
     }
   }
+
   function startTimer() {
     if (!isTimerRunning) {
       isTimerRunning = true;
       matchTimer = setInterval(() => {
         matchTimeSeconds++;
         updateTimerDisplay();
-        saveMatchState();
+        saveCurrentState();
       }, 1000);
       
       startBtn.disabled = true;
       pauseBtn.disabled = false;
       resetBtn.disabled = true;
+
+      startBtn.innerHTML = '<i class="bi bi-play-fill"></i> ממשיך...';
+      pauseBtn.innerHTML = '<i class="bi bi-pause-fill"></i> עצור';
     }
   }
 
@@ -564,6 +847,9 @@ function initializeMatchTimer() {
       startBtn.disabled = false;
       pauseBtn.disabled = true;
       resetBtn.disabled = false;
+
+      startBtn.innerHTML = '<i class="bi bi-play-fill"></i> המשך';
+      pauseBtn.innerHTML = '<i class="bi bi-pause-fill"></i> עצור';
     }
   }
 
@@ -577,89 +863,93 @@ function initializeMatchTimer() {
     startBtn.disabled = false;
     pauseBtn.disabled = true;
     resetBtn.disabled = true;
+    
+    startBtn.innerHTML = '<i class="bi bi-play-fill"></i> התחל';
+  }
+  function showGameEndModal() {
+    const modalHTML = `
+      <div class="modal fade" id="gameEndModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">סיום המשחק</h5>
+            </div>
+            <div class="modal-body text-center">
+              <div class="mb-3">
+                <i class="bi bi-stopwatch-fill text-danger" style="font-size: 3rem;"></i>
+              </div>
+              <h4>הסתיים הזמן!</h4>
+              <p>האם ברצונך לסיים את המשחק?</p>
+            </div>
+            <div class="modal-footer justify-content-center">
+              <button class="btn btn-success" onclick="finishCurrentMatch()">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                סיים משחק
+              </button>
+              <button class="btn btn-secondary" data-bs-dismiss="modal">
+                <i class="bi bi-x-circle-fill me-2"></i>
+                המשך משחק
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    const modal = new bootstrap.Modal(document.getElementById('gameEndModal'));
+    modal.show();
+
+    modal._element.addEventListener('hidden.bs.modal', () => {
+      modal._element.remove();
+    });
   }
 
   // Event Listeners
   startBtn.addEventListener('click', startTimer);
   pauseBtn.addEventListener('click', pauseTimer);
   resetBtn.addEventListener('click', () => {
-    if (confirm('האם אתה בטוח שברצונך לאפס את הטיימר?')) {
-      resetTimer();
-    }
+    const modalHTML = `
+      <div class="modal fade" id="resetConfirmModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">אישור איפוס</h5>
+            </div>
+            <div class="modal-body text-center">
+              <div class="mb-3">
+                <i class="bi bi-exclamation-triangle-fill text-warning" style="font-size: 3rem;"></i>
+              </div>
+              <h4>איפוס טיימר</h4>
+              <p>האם אתה בטוח שברצונך לאפס את הטיימר?</p>
+            </div>
+            <div class="modal-footer justify-content-center">
+              <button class="btn btn-danger" onclick="document.getElementById('resetConfirmModal').remove(); resetTimer();">
+                <i class="bi bi-arrow-counterclockwise me-2"></i>
+                אפס
+              </button>
+              <button class="btn btn-secondary" data-bs-dismiss="modal">
+                <i class="bi bi-x-circle-fill me-2"></i>
+                ביטול
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    const modal = new bootstrap.Modal(document.getElementById('resetConfirmModal'));
+    modal.show();
   });
 
-  // Keyboard Shortcuts
-  document.addEventListener('keydown', (e) => {
-    if (document.getElementById('matchTimer')) {
-      switch(e.code) {
-        case 'Space':
-          e.preventDefault();
-          if (isTimerRunning) {
-            pauseTimer();
-          } else {
-            startTimer();
-          }
-          break;
-        case 'KeyR':
-          if (e.ctrlKey) {
-            e.preventDefault();
-            resetBtn.click();
-          }
-          break;
-      }
-    }
-  });
-
-  // אתחול התצוגה הראשונית
+  // Initialize display
   updateTimerDisplay();
-  pauseBtn.disabled = true;
   resetBtn.disabled = true;
+  pauseBtn.disabled = true;
 }
 
-// State Management
-function saveMatchState() {
-  const state = {
-    numTeams,
-    playersPerTeam,
-    totalPlayers,
-    playersPool,
-    teams,
-    matches,
-    scorers,
-    matchTimeSeconds,
-    isTimerRunning,
-    isExtraTime,
-    activeTeams,
-    waitingTeams
-  };
-  localStorage.setItem('tournamentState', JSON.stringify(state));
-}
-
-function loadSavedState() {
-  try {
-    const savedState = localStorage.getItem('tournamentState');
-    if (savedState) {
-      const state = JSON.parse(savedState);
-      numTeams = state.numTeams;
-      playersPerTeam = state.playersPerTeam;
-      totalPlayers = state.totalPlayers;
-      playersPool = state.playersPool;
-      teams = state.teams;
-      matches = state.matches;
-      scorers = state.scorers;
-      matchTimeSeconds = state.matchTimeSeconds || 0;
-      isTimerRunning = state.isTimerRunning || false;
-      isExtraTime = state.isExtraTime || false;
-      activeTeams = state.activeTeams || [];
-      waitingTeams = state.waitingTeams || [];
-      return true;
-    }
-  } catch (error) {
-    console.error('Error loading saved state:', error);
-  }
-  return false;
-}
-  // Initialize Event Listeners
+// Initialize Event Listeners
 function initializeEventListeners() {
   // Config Form
   document.getElementById('configForm').addEventListener('submit', (e) => {
@@ -674,142 +964,75 @@ function initializeEventListeners() {
   });
 
   // Players Form
-document.getElementById('playersForm').addEventListener('submit', (e) => {
-  e.preventDefault();
-  if (validateForm(e.target)) {
-    const rawText = document.getElementById('playersInput').value.trim();
-    // שיפור הפיצול של השמות - תמיכה בפסיקים ושורות חדשות
-    const names = rawText.split(/[,\n]+/)
-      .map(name => name.trim())
-      .filter(name => name.length > 0); // סינון שורות ריקות
+  const playersForm = document.getElementById('playersForm');
+  const playersInput = document.getElementById('playersInput');
+  const submitButton = playersForm.querySelector('button[type="submit"]');
 
-    console.log('Names:', names); // לבדיקה
-    console.log('Expected players:', totalPlayers); // לבדיקה
+  playersForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    if (validateForm(e.target)) {
+      const rawText = playersInput.value.trim();
+      const names = rawText.split(/[\n,]+/)
+        .map(name => name.trim())
+        .filter(name => name && name.length > 0);
 
-    if (names.length === totalPlayers) {
-      playersPool = names;
-      setupTeamsArray();
-      renderTeamsDefinition();
-      showScreen('screenDefineTeams');
-    } else {
-      alert(`נא להזין בדיוק ${totalPlayers} שמות! (הוזנו ${names.length} שמות)`);
+      if (names.length === totalPlayers) {
+        playersPool = names;
+        setupTeamsArray();
+        renderTeamsDefinition();
+        showScreen('screenDefineTeams');
+      } else {
+        showErrorModal('שגיאה', `נא להזין בדיוק ${totalPlayers} שמות! (הוזנו ${names.length} שמות)`);
+      }
     }
-  }
-});
+  });
+
+  // Alternative direct button click handler
+  submitButton.addEventListener('click', (e) => {
+    e.preventDefault();
+    playersForm.dispatchEvent(new Event('submit'));
+  });
 
   // Teams Definition Done Button
   document.getElementById('teamsDefinitionDoneBtn').addEventListener('click', () => {
-    initializeDragAndDrop();
-    renderPlayerAssignment();
-    showScreen('screenAssign');
-  });
-
-  // Finish Assignment Button
-  document.getElementById('finishAssignBtn').addEventListener('click', () => {
-    if (validateTeamSizes()) {
-      initializeFirstMatch();
-    } else {
-      alert(`כל קבוצה חייבת להכיל בדיוק ${playersPerTeam} שחקנים!`);
-    }
+    showFirstMatchSelection();
   });
 
   // End Tournament Button
   document.getElementById('endTournamentBtn').addEventListener('click', () => {
-    if (confirm('האם אתה בטוח שברצונך לסיים את הטורניר?')) {
-      localStorage.removeItem('tournamentState');
-      location.reload();
-    }
-  });
-}
-
-// First Match Selection
-function initializeFirstMatch() {
-  const selectFirstMatchHTML = `
-    <div class="modal fade" id="selectFirstMatchModal" tabindex="-1">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">בחירת משחק ראשון</h5>
-          </div>
-          <div class="modal-body">
-            <div class="mb-3">
-              <label class="form-label">קבוצה ראשונה:</label>
-              <select class="form-select" id="firstTeamSelect">
-                ${teams.map((t, i) => `<option value="${i}">${t.name}</option>`).join('')}
-              </select>
+    const modalHTML = `
+      <div class="modal fade" id="endTournamentModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">סיום הטורניר</h5>
             </div>
-            <div class="mb-3">
-              <label class="form-label">קבוצה שניה:</label>
-              <select class="form-select" id="secondTeamSelect">
-                ${teams.map((t, i) => `<option value="${i}">${t.name}</option>`).join('')}
-              </select>
+            <div class="modal-body text-center">
+              <div class="mb-3">
+                <i class="bi bi-exclamation-triangle-fill text-warning" style="font-size: 3rem;"></i>
+              </div>
+              <h4>האם אתה בטוח?</h4>
+              <p>סיום הטורניר ימחק את כל הנתונים הקיימים</p>
             </div>
-          </div>
-          <div class="modal-footer">
-            <button class="btn btn-primary" onclick="startTournamentWithTeams()">
-              התחל טורניר
-            </button>
+            <div class="modal-footer justify-content-center">
+              <button class="btn btn-danger" onclick="location.reload()">
+                <i class="bi bi-x-circle-fill me-2"></i>
+                סיים טורניר
+              </button>
+              <button class="btn btn-secondary" data-bs-dismiss="modal">
+                <i class="bi bi-arrow-return-left me-2"></i>
+                חזור לטורניר
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  `;
-  
-  document.body.insertAdjacentHTML('beforeend', selectFirstMatchHTML);
-  const modal = new bootstrap.Modal(document.getElementById('selectFirstMatchModal'));
-  modal.show();
-}
+    `;
 
-function startTournamentWithTeams() {
-  const firstTeam = parseInt(document.getElementById('firstTeamSelect').value);
-  const secondTeam = parseInt(document.getElementById('secondTeamSelect').value);
-  
-  if (firstTeam === secondTeam) {
-    alert('יש לבחור שתי קבוצות שונות');
-    return;
-  }
-
-  // הגדרת הקבוצות הפעילות והממתינות
-  activeTeams = [firstTeam, secondTeam];
-  waitingTeams = teams.map((_, i) => i).filter(i => !activeTeams.includes(i));
-
-  // איפוס סטטיסטיקות
-  teams.forEach(team => {
-    team.w = 0; team.d = 0; team.l = 0;
-    team.gf = 0; team.ga = 0; team.gd = 0;
-    team.points = 0;
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    const modal = new bootstrap.Modal(document.getElementById('endTournamentModal'));
+    modal.show();
   });
-
-  document.getElementById('selectFirstMatchModal').remove();
-  showScreen('screenTournament');
-  initializeMatchTimer();
-  updateTeamsTable();
-  updateScorersTable();
-  renderCurrentMatch();
-}
-
-// Teams & Player Assignment
-function setupTeamsArray() {
-  teams = [];
-  for (let i = 0; i < numTeams; i++) {
-    teams.push({
-      name: `קבוצה ${i+1}`,
-      color: getRandomColor(),
-      players: [],
-      w: 0, d: 0, l: 0,
-      gf: 0, ga: 0, gd: 0,
-      points: 0
-    });
-  }
-}
-
-function getRandomColor() {
-  const letters = '0123456789ABCDEF';
-  let color = '#';
-  for (let i = 0; i < 6; i++) {
-    color += letters[Math.floor(Math.random() * 16)];
-  }
-  return color;
 }
 
 // Initialize Application
