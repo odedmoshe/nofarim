@@ -77,6 +77,7 @@
       margin: 10px 0;
       border-radius: 4px;
       background: rgba(var(--primary-color-rgb), 0.05);
+      transition: all 0.3s ease;
     }
 
     .draggable-player {
@@ -87,11 +88,28 @@
       border-radius: 4px;
       cursor: move;
       transition: all 0.2s ease;
+      user-select: none;
     }
 
     .draggable-player:hover {
       background: var(--secondary-color);
       color: white;
+      transform: translateY(-2px);
+    }
+
+    .sortable-ghost {
+      opacity: 0.4;
+      background-color: var(--primary-color) !important;
+    }
+
+    .sortable-drag {
+      opacity: 0.8;
+      cursor: move;
+    }
+
+    .team-container.sortable-dragover {
+      background: rgba(var(--primary-color-rgb), 0.2);
+      border-style: solid;
     }
 
     .dark-mode-toggle {
@@ -397,6 +415,85 @@ function getRandomColor() {
   return color;
 }
 
+// Drag & Drop Implementation
+function initializeDragAndDrop() {
+  const containers = document.querySelectorAll('.team-container');
+  containers.forEach(container => {
+    new Sortable(container, {
+      group: {
+        name: 'shared',
+        pull: true,
+        put: true
+      },
+      animation: 150,
+      ghostClass: 'sortable-ghost',
+      dragClass: 'sortable-drag',
+      onEnd: (evt) => {
+        validateTeamSizes();
+        
+        // עדכון רשימת השחקנים בקבוצות
+        teams.forEach((team, idx) => {
+          const container = document.getElementById(`team-${idx}`);
+          if (container) {
+            team.players = Array.from(container.querySelectorAll('.draggable-player'))
+              .map(p => p.textContent.trim());
+          }
+        });
+      }
+    });
+  });
+}
+
+function renderPlayerAssignment() {
+  const unassignedContainer = document.getElementById('unassignedPlayers');
+  const teamContainers = document.getElementById('teamContainers');
+  
+  // ניקוי מיכלים
+  unassignedContainer.innerHTML = '';
+  teamContainers.innerHTML = '';
+  
+  // הוספת שחקנים לא משובצים
+  playersPool.forEach(player => {
+    const playerDiv = document.createElement('div');
+    playerDiv.className = 'draggable-player';
+    playerDiv.textContent = player;
+    playerDiv.setAttribute('draggable', 'true');
+    unassignedContainer.appendChild(playerDiv);
+  });
+  
+  // יצירת מיכלי קבוצות
+  teams.forEach((team, idx) => {
+    const teamDiv = document.createElement('div');
+    teamDiv.className = 'mb-3';
+    teamDiv.innerHTML = `
+      <h5>${team.name}</h5>
+      <div id="team-${idx}" class="team-container" data-team-id="${idx}"></div>
+    `;
+    teamContainers.appendChild(teamDiv);
+  });
+
+  // הפעלת Drag & Drop
+  initializeDragAndDrop();
+}
+
+function validateTeamSizes() {
+  const teamContainers = document.querySelectorAll('#teamContainers .team-container');
+  let isValid = true;
+  
+  teams.forEach((team, idx) => {
+    const container = document.getElementById(`team-${idx}`);
+    const players = container.querySelectorAll('.draggable-player');
+    team.players = Array.from(players).map(p => p.textContent);
+    
+    if (players.length !== playersPerTeam) {
+      isValid = false;
+    }
+  });
+  
+  document.getElementById('finishAssignBtn').disabled = !isValid;
+  return isValid;
+}
+
 function renderTeamsDefinition() {
   const container = document.getElementById('teamsDefinition');
   container.innerHTML = '';
@@ -429,8 +526,7 @@ function renderTeamsDefinition() {
     container.appendChild(teamDiv);
   });
 }
-
-// Tournament Management
+  // Tournament Management
 function prepareTournament() {
   // Reset tournament state
   matches = [];
@@ -540,7 +636,55 @@ function updateScorersTable() {
     tbody.appendChild(row);
   });
 }
-  function finishCurrentMatch() {
+
+function renderCurrentMatch() {
+  const container = document.getElementById('currentMatchTeams');
+  const title = document.getElementById('currentMatchTitle');
+  
+  if (activeTeams.length < 2) {
+    title.textContent = 'הטורניר הסתיים!';
+    container.innerHTML = '<div class="col text-center">כל המשחקים הסתיימו</div>';
+    document.getElementById('submitMatchBtn').disabled = true;
+    return;
+  }
+
+  const teamA = teams[activeTeams[0]];
+  const teamB = teams[activeTeams[1]];
+  title.textContent = `${teamA.name} נגד ${teamB.name}`;
+
+  container.innerHTML = `
+    <div class="col-md-6">
+      <h6>${teamA.name}</h6>
+      <div id="teamAPlayers"></div>
+    </div>
+    <div class="col-md-6">
+      <h6>${teamB.name}</h6>
+      <div id="teamBPlayers"></div>
+    </div>
+  `;
+
+  // Render player score controls
+  ['A', 'B'].forEach((team, idx) => {
+    const teamContainer = document.getElementById(`team${team}Players`);
+    teams[activeTeams[idx]].players.forEach(player => {
+      const playerDiv = document.createElement('div');
+      playerDiv.className = 'draggable-player';
+      playerDiv.innerHTML = `
+        <div class="d-flex justify-content-between align-items-center">
+          <span>${player}</span>
+          <div class="btn-group">
+            <button class="btn btn-sm btn-outline-secondary" onclick="updatePlayerScore('${player}', -1)">-</button>
+            <span class="btn btn-sm" data-player="${player}">0</span>
+            <button class="btn btn-sm btn-outline-secondary" onclick="updatePlayerScore('${player}', 1)">+</button>
+          </div>
+        </div>
+      `;
+      teamContainer.appendChild(playerDiv);
+    });
+  });
+}
+
+function finishCurrentMatch() {
   const teamAGoals = Array.from(document.querySelectorAll('#teamAPlayers [data-player]'))
     .reduce((sum, span) => sum + (parseInt(span.textContent) || 0), 0);
     
@@ -625,55 +769,6 @@ function handleMatchEnd(winnerIdx, loserIdx) {
   }
 }
 
-function renderCurrentMatch() {
-  const container = document.getElementById('currentMatchTeams');
-  const title = document.getElementById('currentMatchTitle');
-  
-  if (activeTeams.length < 2) {
-    title.textContent = 'הטורניר הסתיים!';
-    container.innerHTML = '<div class="col text-center">כל המשחקים הסתיימו</div>';
-    document.getElementById('submitMatchBtn').disabled = true;
-    return;
-  }
-
-  const teamA = teams[activeTeams[0]];
-  const teamB = teams[activeTeams[1]];
-  title.textContent = `${teamA.name} נגד ${teamB.name}`;
-
-  container.innerHTML = `
-    <div class="col-md-6">
-      <h6>${teamA.name}</h6>
-      <div id="teamAPlayers"></div>
-    </div>
-    <div class="col-md-6">
-      <h6>${teamB.name}</h6>
-      <div id="teamBPlayers"></div>
-    </div>
-  `;
-
-  // Render player score controls
-  ['A', 'B'].forEach((team, idx) => {
-    const teamContainer = document.getElementById(`team${team}Players`);
-    teams[activeTeams[idx]].players.forEach(player => {
-      const playerDiv = document.createElement('div');
-      playerDiv.className = 'draggable-player';
-      playerDiv.innerHTML = `
-        <div class="d-flex justify-content-between align-items-center">
-          <span>${player}</span>
-          <div class="btn-group">
-            <button class="btn btn-sm btn-outline-secondary" onclick="updatePlayerScore('${player}', -1)">-</button>
-            <span class="btn btn-sm" data-player="${player}">0</span>
-            <button class="btn btn-sm btn-outline-secondary" onclick="updatePlayerScore('${player}', 1)">+</button>
-          </div>
-        </div>
-      `;
-      teamContainer.appendChild(playerDiv);
-    });
-  });
-
-  document.getElementById('submitMatchBtn').disabled = false;
-}
-
 function updatePlayerScore(playerName, change) {
   const scoreSpan = document.querySelector(`[data-player="${playerName}"]`);
   let currentScore = parseInt(scoreSpan.textContent) || 0;
@@ -742,65 +837,6 @@ function initializeEventListeners() {
   });
 }
 
-// Drag & Drop
-function initializeDragAndDrop() {
-  const containers = document.querySelectorAll('.team-container');
-  containers.forEach(container => {
-    new Sortable(container, {
-      group: 'shared',
-      animation: 150,
-      ghostClass: 'sortable-ghost',
-      onEnd: validateTeamSizes
-    });
-  });
-}
-
-function renderPlayerAssignment() {
-  const unassignedContainer = document.getElementById('unassignedPlayers');
-  const teamContainers = document.getElementById('teamContainers');
-  
-  // Clear containers
-  unassignedContainer.innerHTML = '';
-  teamContainers.innerHTML = '';
-  
-  // Add unassigned players
-  playersPool.forEach(player => {
-    const playerDiv = document.createElement('div');
-    playerDiv.className = 'draggable-player';
-    playerDiv.textContent = player;
-    unassignedContainer.appendChild(playerDiv);
-  });
-  
-  // Create team containers
-  teams.forEach((team, idx) => {
-    const teamDiv = document.createElement('div');
-    teamDiv.className = 'mb-3';
-    teamDiv.innerHTML = `
-      <h5>${team.name}</h5>
-      <div id="team-${idx}" class="team-container"></div>
-    `;
-    teamContainers.appendChild(teamDiv);
-  });
-}
-
-function validateTeamSizes() {
-  const teamContainers = document.querySelectorAll('#teamContainers .team-container');
-  let isValid = true;
-  
-  teams.forEach((team, idx) => {
-    const container = document.getElementById(`team-${idx}`);
-    const players = container.querySelectorAll('.draggable-player');
-    team.players = Array.from(players).map(p => p.textContent);
-    
-    if (players.length !== playersPerTeam) {
-      isValid = false;
-    }
-  });
-  
-  document.getElementById('finishAssignBtn').disabled = !isValid;
-  return isValid;
-}
-
 // State Management
 function saveCurrentState() {
   const state = {
@@ -810,7 +846,9 @@ function saveCurrentState() {
     playersPool,
     teams,
     matches,
-    scorers
+    scorers,
+    activeTeams,
+    waitingTeams
   };
   localStorage.setItem('tournamentState', JSON.stringify(state));
 }
@@ -827,6 +865,8 @@ function loadSavedState() {
       teams = state.teams;
       matches = state.matches;
       scorers = state.scorers;
+      activeTeams = state.activeTeams;
+      waitingTeams = state.waitingTeams;
       return true;
     }
   } catch (error) {
@@ -842,6 +882,11 @@ document.addEventListener('DOMContentLoaded', () => {
   
   if (!loadSavedState()) {
     showScreen('screenConfig');
+  } else {
+    showScreen('screenTournament');
+    updateTeamsTable();
+    updateScorersTable();
+    renderCurrentMatch();
   }
 });
 </script>
