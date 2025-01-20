@@ -188,11 +188,12 @@
 
     /* Screen Transitions */
     .screen {
-      opacity: 0;
-      transform: translateY(20px);
-      transition: opacity var(--transition-normal), transform var(--transition-normal);
-      display: none;
-    }
+  display: none;
+}
+
+.screen.active {
+  display: block;
+}
 
     .screen.active {
       opacity: 1;
@@ -745,25 +746,18 @@ function validateForm(form) {
 let currentScreen = 'screenConfig';
 
 function showScreen(screenId) {
-  console.log(`Switching to screen: ${screenId}`);
+  console.log(`Switching to screen: ${screenId}`); // לבדיקה
   document.querySelectorAll('.screen').forEach(screen => {
-    screen.style.display = 'none';
     screen.classList.remove('active');
+    screen.style.display = 'none';
   });
   
   const targetScreen = document.getElementById(screenId);
   if (targetScreen) {
     targetScreen.style.display = 'block';
-    setTimeout(() => {
-      targetScreen.classList.add('active');
-    }, 10);
-    currentScreen = screenId;
-    saveCurrentState();
-  } else {
-    console.error(`Screen ${screenId} not found!`);
+    targetScreen.classList.add('active');
   }
 }
-
 // Dark Mode Management
 const darkModeToggle = document.getElementById('darkModeToggle');
 
