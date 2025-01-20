@@ -1067,6 +1067,116 @@ function loadSavedState() {
   }
   return false;
 }
+  // First Match Selection
+function showFirstMatchSelection() {
+  const modalHTML = `
+    <div class="modal fade" id="selectFirstMatchModal" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">בחירת משחק ראשון</h5>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label">קבוצה ראשונה</label>
+              <select class="form-select form-select-lg" id="firstTeamSelect">
+                ${teams.map((t, i) => `<option value="${i}">${t.name}</option>`).join('')}
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">קבוצה שניה</label>
+              <select class="form-select form-select-lg" id="secondTeamSelect">
+                ${teams.map((t, i) => `<option value="${i}">${t.name}</option>`).join('')}
+              </select>
+            </div>
+          </div>
+          <div class="modal-footer justify-content-center">
+            <button class="btn btn-primary btn-lg" onclick="startTournamentWithTeams()">
+              <i class="bi bi-play-fill me-2"></i>
+              התחל טורניר
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.insertAdjacentHTML('beforeend', modalHTML);
+  const modal = new bootstrap.Modal(document.getElementById('selectFirstMatchModal'));
+  modal.show();
+}
+
+// Start Tournament
+function startTournamentWithTeams() {
+  const firstTeam = parseInt(document.getElementById('firstTeamSelect').value);
+  const secondTeam = parseInt(document.getElementById('secondTeamSelect').value);
+  
+  if (firstTeam === secondTeam) {
+    showErrorModal('שגיאה', 'יש לבחור שתי קבוצות שונות');
+    return;
+  }
+
+  activeTeams = [firstTeam, secondTeam];
+  waitingTeams = teams.map((_, i) => i).filter(i => !activeTeams.includes(i));
+
+  document.getElementById('selectFirstMatchModal').remove();
+  showScreen('screenTournament');
+  initializeMatchTimer();
+  updateTeamsTable();
+  updateScorersTable();
+  renderCurrentMatch();
+}
+
+// Table Updates
+function updateTeamsTable() {
+  const tbody = document.getElementById('teamsTableBody');
+  tbody.innerHTML = '';
+
+  const sortedTeams = teams.map((team, idx) => ({...team, originalIndex: idx}))
+    .sort((a, b) => {
+      if (b.points !== a.points) return b.points - a.points;
+      if (b.gd !== a.gd) return b.gd - a.gd;
+      return b.gf - a.gf;
+    });
+
+  sortedTeams.forEach((team, rank) => {
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${team.name}</td>
+      <td>
+        <span style="display:inline-block;width:20px;height:20px;background:${team.color};border-radius:50%"></span>
+      </td>
+      <td>${team.w}</td>
+      <td>${team.d}</td>
+      <td>${team.l}</td>
+      <td>${team.gf}</td>
+      <td>${team.ga}</td>
+      <td>${team.gd}</td>
+      <td>${team.points}</td>
+      <td>${rank + 1}</td>
+    `;
+    tbody.appendChild(row);
+  });
+}
+
+function updateScorersTable() {
+  const tbody = document.getElementById('scorersTableBody');
+  tbody.innerHTML = '';
+
+  const sortedScorers = Object.entries(scorers)
+    .map(([name, data]) => ({name, ...data}))
+    .sort((a, b) => b.goals - a.goals);
+
+  sortedScorers.forEach(scorer => {
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${scorer.name}</td>
+      <td>${scorer.team}</td>
+      <td>${scorer.goals}</td>
+    `;
+    tbody.appendChild(row);
+  });
+}
 // Initialize Event Listeners
 function initializeEventListeners() {
   // Config Form
