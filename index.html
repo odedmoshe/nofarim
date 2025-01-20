@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+  <meta charset="UTF-8" />
+  <title>טורניר כדורגל</title>
+  <style>
+    body {
+      direction: rtl;
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    h1, h2, h3 {
+      margin-top: 0;
+    }
+    table {
+      border-collapse: collapse;
+      margin: 10px 0;
+    }
+    th, td {
+      border: 1px solid #aaa;
+      padding: 8px;
+      text-align: center;
+    }
+    .teamColorBox {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      margin-left: 5px;
+      vertical-align: middle;
+    }
+    .form-section {
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin-top: 20px;
+      max-width: 500px;
+    }
+    label {
+      display: inline-block;
+      min-width: 70px;
+      margin-bottom: 5px;
+    }
+    input[type="number"], select {
+      width: 80px;
+      margin: 5px;
+    }
+    input[type="text"] {
+      width: 95%;
+      margin-top: 5px;
+    }
+    button {
+      margin-top: 10px;
+      padding: 8px 16px;
+      cursor: pointer;
+    }
+    .highlight {
+      font-weight: bold;
+      color: #d00;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>אפליקציית טורניר כדורגל</h1>
+
+  <!-- הצגת האלופה ומלך השערים -->
+  <div id="championInfo"></div>
+
+  <!-- טבלת ניקוד של הקבוצות -->
+  <h2>טבלת הליגה</h2>
+  <table id="teamsTable">
+    <thead>
+      <tr>
+        <th>קבוצה</th>
+        <th>צבע</th>
+        <th>נקודות</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- ימולא דינמית ע"י JavaScript -->
+    </tbody>
+  </table>
+
+  <!-- טבלת מלך השערים -->
+  <h2>מלך השערים</h2>
+  <table id="scorersTable">
+    <thead>
+      <tr>
+        <th>שחקן</th>
+        <th>קבוצה</th>
+        <th>שערים</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- ימולא דינמית ע"י JavaScript -->
+    </tbody>
+  </table>
+
+  <!-- עדכון תוצאות משחק -->
+  <div class="form-section">
+    <h3>הכנס תוצאת משחק</h3>
+    <form id="matchForm">
+      <div>
+        <label>קבוצה 1:</label>
+        <select id="team1Select"></select>
+        <label>שערים:</label>
+        <input type="number" id="team1Goals" min="0" value="0" required />
+      </div>
+      <div>
+        <label>קבוצה 2:</label>
+        <select id="team2Select"></select>
+        <label>שערים:</label>
+        <input type="number" id="team2Goals" min="0" value="0" required />
+      </div>
+      <div>
+        <label>כובשים קבוצה 1:</label><br>
+        <input 
+          type="text" 
+          id="team1Scorers" 
+          placeholder="הקלד שמות שחקנים (מופרדים בפסיק) למשל: 'משה, עמית'"
+        />
+      </div>
+      <div>
+        <label>כובשים קבוצה 2:</label><br>
+        <input 
+          type="text" 
+          id="team2Scorers" 
+          placeholder="הקלד שמות שחקנים (מופרדים בפסיק)"
+        />
+      </div>
+      <button type="submit">עדכן תוצאה</button>
+    </form>
+  </div>
+
+  <script>
+    // הגדרת הקבוצות
+    // כל קבוצה כוללת: שם, צבע, רשימת שחקנים (6), נקודות התחלתיות = 0
+    const teams = [
+      {
+        name: "קבוצה א",
+        color: "red",
+        players: ["שחקן א1","שחקן א2","שחקן א3","שחקן א4","שחקן א5","שחקן א6"],
+        points: 0
+      },
+      {
+        name: "קבוצה ב",
+        color: "blue",
+        players: ["שחקן ב1","שחקן ב2","שחקן ב3","שחקן ב4","שחקן ב5","שחקן ב6"],
+        points: 0
+      },
+      {
+        name: "קבוצה ג",
+        color: "green",
+        players: ["שחקן ג1","שחקן ג2","שחקן ג3","שחקן ג4","שחקן ג5","שחקן ג6"],
+        points: 0
+      }
+    ];
+
+    // אובייקט לשמירת מספר שערים לכל שחקן { "שם שחקן": { goals: X, team: "שם קבוצה" } }
+    const scorers = {};
+
+    // עם טעינת הדף, נבנה את תפריטי הבחירה ואת הטבלאות ההתחלתיות
+    window.onload = () => {
+      fillTeamSelects();
+      updateTeamsTable();
+      updateScorersTable();
+      updateChampionAndTopScorer();
+    };
+
+    // מילוי רשימת הקבוצות בתפריטי הבחירה
+    function fillTeamSelects() {
+      const team1Select = document.getElementById("team1Select");
+      const team2Select = document.getElementById("team2Select");
+
+      teams.forEach((team, index) => {
+        const option1 = document.createElement("option");
+        option1.value = index;
+        option1.textContent = team.name;
+        team1Select.appendChild(option1);
+
+        const option2 = document.createElement("option");
+        option2.value = index;
+        option2.textContent = team.name;
+        team2Select.appendChild(option2);
+      });
+    }
+
+    // עדכון טבלת הקבוצות (נקודות וכו')
+    function updateTeamsTable() {
+      const tbody = document.querySelector("#teamsTable tbody");
+      tbody.innerHTML = ""; // איפוס התוכן
+
+      teams.forEach(team => {
+        const tr = document.createElement("tr");
+
+        // עמודת שם הקבוצה
+        const tdName = document.createElement("td");
+        tdName.textContent = team.name;
+
+        // עמודת צבע הקבוצה
+        const tdColor = document.createElement("td");
+        const colorBox = document.createElement("span");
+        colorBox.classList.add("teamColorBox");
+        colorBox.style.backgroundColor = team.color;
+        tdColor.textContent = team.color;
+        tdColor.appendChild(colorBox);
+
+        // עמודת נקודות
+        const tdPoints = document.createElement("td");
+        tdPoints.textContent = team.points;
+
+        tr.appendChild(tdName);
+        tr.appendChild(tdColor);
+        tr.appendChild(tdPoints);
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    // עדכון טבלת מלך השערים
+    function updateScorersTable() {
+      const tbody = document.querySelector("#scorersTable tbody");
+      tbody.innerHTML = ""; // איפוס התוכן
+
+      // ניצור מערך מהאובייקט scorers ואז נמיין לפי מספר השערים
+      const scorersArray = Object.keys(scorers).map(playerName => {
+        return {
+          name: playerName,
+          goals: scorers[playerName].goals,
+          team: scorers[playerName].team
+        };
+      });
+
+      // מיון יורד לפי כמות שערים
+      scorersArray.sort((a, b) => b.goals - a.goals);
+
+      // בניית שורות
+      scorersArray.forEach(scorer => {
+        const tr = document.createElement("tr");
+        const tdName = document.createElement("td");
+        const tdTeam = document.createElement("td");
+        const tdGoals = document.createElement("td");
+
+        tdName.textContent = scorer.name;
+        tdTeam.textContent = scorer.team;
+        tdGoals.textContent = scorer.goals;
+
+        tr.appendChild(tdName);
+        tr.appendChild(tdTeam);
+        tr.appendChild(tdGoals);
+        tbody.appendChild(tr);
+      });
+    }
+
+    // חישוב אלופה (המובילה בנקודות) ומלך השערים
+    function updateChampionAndTopScorer() {
+      // מציאת אלופה
+      let champion = teams[0];
+      teams.forEach(t => {
+        if (t.points > champion.points) {
+          champion = t;
+        }
+      });
+
+      // מציאת מלך השערים (השחקן עם הכי הרבה שערים)
+      let topScorerName = null;
+      let topScorerGoals = 0;
+
+      Object.keys(scorers).forEach(playerName => {
+        const g = scorers[playerName].goals;
+        if (g > topScorerGoals) {
+          topScorerGoals = g;
+          topScorerName = playerName;
+        }
+      });
+
+      const championInfo = document.getElementById("championInfo");
+      championInfo.innerHTML = "";
+
+      const championElem = document.createElement("p");
+      championElem.textContent = `אלופה נוכחית: ${champion.name} ( ${champion.points} נק')`;
+
+      championInfo.appendChild(championElem);
+
+      if (topScorerName) {
+        const topScorerElem = document.createElement("p");
+        topScorerElem.textContent = `מלך השערים הנוכחי: ${topScorerName} (${topScorerGoals} שערים)`;
+        championInfo.appendChild(topScorerElem);
+      } else {
+        const noScorerElem = document.createElement("p");
+        noScorerElem.textContent = "טרם הובקעו שערים.";
+        championInfo.appendChild(noScorerElem);
+      }
+    }
+
+    // האזנה לטופס עדכון תוצאות המשחק
+    const matchForm = document.getElementById("matchForm");
+    matchForm.addEventListener("submit", event => {
+      event.preventDefault();
+      const team1Index = parseInt(document.getElementById("team1Select").value);
+      const team2Index = parseInt(document.getElementById("team2Select").value);
+      const team1Goals = parseInt(document.getElementById("team1Goals").value);
+      const team2Goals = parseInt(document.getElementById("team2Goals").value);
+
+      // לא לאפשר משחק נגד אותה קבוצה
+      if (team1Index === team2Index) {
+        alert("בחר שתי קבוצות שונות!");
+        return;
+      }
+
+      const team1 = teams[team1Index];
+      const team2 = teams[team2Index];
+
+      // עדכון נקודות על פי תוצאה
+      if (team1Goals > team2Goals) {
+        // קבוצה 1 מנצחת
+        team1.points += 3;
+      } else if (team1Goals < team2Goals) {
+        // קבוצה 2 מנצחת
+        team2.points += 3;
+      } else {
+        // תיקו
+        team1.points += 1;
+        team2.points += 1;
+      }
+
+      // עדכון מבקיעים
+      const scorersTeam1 = document.getElementById("team1Scorers").value
+        .split(",")
+        .map(s => s.trim())
+        .filter(s => s !== "");
+      const scorersTeam2 = document.getElementById("team2Scorers").value
+        .split(",")
+        .map(s => s.trim())
+        .filter(s => s !== "");
+
+      // רישום שערים למבקיעים
+      scorersTeam1.forEach(name => {
+        addGoal(name, team1.name);
+      });
+      scorersTeam2.forEach(name => {
+        addGoal(name, team2.name);
+      });
+
+      // רענון הטבלאות
+      updateTeamsTable();
+      updateScorersTable();
+      updateChampionAndTopScorer();
+
+      // איפוס הטופס
+      matchForm.reset();
+      document.getElementById("team1Select").value = 0;
+      document.getElementById("team2Select").value = 1;
+    });
+
+    // פונקציה להוספת שער למבקיע
+    function addGoal(playerName, teamName) {
+      if (!scorers[playerName]) {
+        // אם השחקן לא קיים עדיין - נרשום אותו עם 1 שער
+        scorers[playerName] = {
+          goals: 1,
+          team: teamName
+        };
+      } else {
+        // אחרת - נעדכן את מספר השערים
+        scorers[playerName].goals += 1;
+      }
+    }
+
+  </script>
+</body>
+</html>
