@@ -942,7 +942,131 @@ function initializeMatchTimer() {
   resetBtn.disabled = true;
   pauseBtn.disabled = true;
 }
+// Teams Management
+function setupTeamsArray() {
+  teams = [];
+  for (let i = 0; i < numTeams; i++) {
+    teams.push({
+      name: `קבוצה ${i+1}`,
+      color: getRandomColor(),
+      players: [],
+      w: 0, d: 0, l: 0,
+      gf: 0, ga: 0, gd: 0,
+      points: 0
+    });
+  }
+}
 
+function getRandomColor() {
+  const letters = '0123456789ABCDEF';
+  let color = '#';
+  for (let i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)];
+  }
+  return color;
+}
+
+function renderTeamsDefinition() {
+  const container = document.getElementById('teamsDefinition');
+  container.innerHTML = '';
+  
+  teams.forEach((team, idx) => {
+    const teamDiv = document.createElement('div');
+    teamDiv.className = 'mb-3 p-3 border rounded';
+    teamDiv.innerHTML = `
+      <div class="mb-2">
+        <label class="form-label">שם קבוצה ${idx + 1}:</label>
+        <input type="text" class="form-control" value="${team.name}">
+      </div>
+      <div>
+        <label class="form-label">צבע קבוצה:</label>
+        <input type="color" class="form-control" value="${team.color}">
+      </div>
+    `;
+
+    const nameInput = teamDiv.querySelector('input[type="text"]');
+    const colorInput = teamDiv.querySelector('input[type="color"]');
+
+    nameInput.addEventListener('change', () => {
+      teams[idx].name = nameInput.value || `קבוצה ${idx + 1}`;
+    });
+
+    colorInput.addEventListener('change', () => {
+      teams[idx].color = colorInput.value;
+    });
+
+    container.appendChild(teamDiv);
+  });
+}
+
+function showErrorModal(title, message) {
+  const modalHTML = `
+    <div class="modal fade" id="errorModal" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">${title}</h5>
+          </div>
+          <div class="modal-body text-center">
+            <div class="mb-3">
+              <i class="bi bi-exclamation-circle-fill text-danger" style="font-size: 3rem;"></i>
+            </div>
+            <p>${message}</p>
+          </div>
+          <div class="modal-footer justify-content-center">
+            <button class="btn btn-secondary" data-bs-dismiss="modal">סגור</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.insertAdjacentHTML('beforeend', modalHTML);
+  const modal = new bootstrap.Modal(document.getElementById('errorModal'));
+  modal.show();
+
+  modal._element.addEventListener('hidden.bs.modal', () => {
+    modal._element.remove();
+  });
+}
+
+// State Management
+function saveCurrentState() {
+  const state = {
+    numTeams,
+    playersPerTeam,
+    totalPlayers,
+    playersPool,
+    teams,
+    matches,
+    scorers,
+    activeTeams,
+    waitingTeams
+  };
+  localStorage.setItem('tournamentState', JSON.stringify(state));
+}
+
+function loadSavedState() {
+  try {
+    const savedState = localStorage.getItem('tournamentState');
+    if (savedState) {
+      const state = JSON.parse(savedState);
+      numTeams = state.numTeams;
+      playersPerTeam = state.playersPerTeam;
+      totalPlayers = state.totalPlayers;
+      playersPool = state.playersPool;
+      teams = state.teams;
+      matches = state.matches;
+      scorers = state.scorers;
+      activeTeams = state.activeTeams;
+      waitingTeams = state.waitingTeams;
+      return true;
+    }
+  } catch (error) {
+    console.error('Error loading saved state:', error);
+  }
+  return false;
+}
 // Initialize Event Listeners
 function initializeEventListeners() {
   // Config Form
