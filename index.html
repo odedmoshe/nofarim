@@ -2,25 +2,99 @@
 <html lang="he">
 <head>
   <meta charset="UTF-8" />
-  <title>טורניר כדורגל</title>
+  <title>טורניר - המפסיד יוצא</title>
   <style>
     body {
       direction: rtl;
-      font-family: Arial, sans-serif;
-      margin: 20px;
+      margin: 0;
+      font-family: "Alef", Arial, sans-serif;
+      background: #f9f9f9;
     }
-    h1, h2, h3 {
-      margin-top: 0;
-    }
-    table {
-      border-collapse: collapse;
-      margin: 10px 0;
-    }
-    th, td {
-      border: 1px solid #aaa;
-      padding: 8px;
+
+    header {
+      background: #3f51b5;
+      color: #fff;
+      padding: 10px;
       text-align: center;
     }
+
+    .container {
+      display: flex;
+      min-height: calc(100vh - 60px); /* גובה הדף פחות כותרת */
+    }
+
+    /* סרגל צדדי (טבלת קבוצות) */
+    .sidebar {
+      width: 250px;
+      background: #fff;
+      border-left: 1px solid #ccc;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+
+    .sidebar h3 {
+      margin-top: 0;
+    }
+
+    .content {
+      flex: 1;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    /* טופס פתיחה: הכנסת 18 שמות */
+    #initialSetupForm, #matchSection, #nextMatchSection {
+      background: #fff;
+      border: 1px solid #ddd;
+      padding: 15px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    #initialSetupForm h2 {
+      margin-top: 0;
+    }
+
+    label {
+      display: block;
+      margin-top: 8px;
+    }
+
+    .players-input {
+      width: 100%;
+      height: 100px;
+      margin: 5px 0;
+    }
+
+    button {
+      background: #3f51b5;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      cursor: pointer;
+      margin-top: 10px;
+      border-radius: 4px;
+      font-size: 16px;
+    }
+
+    button:hover {
+      background: #2c3e9b;
+    }
+
+    /* טבלת קבוצות בסרגל הצד */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 10px 0;
+      font-size: 14px;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      text-align: center;
+      padding: 6px;
+    }
+
     .teamColorBox {
       display: inline-block;
       width: 12px;
@@ -28,344 +102,421 @@
       margin-left: 5px;
       vertical-align: middle;
     }
-    .form-section {
-      border: 1px solid #ccc;
-      padding: 10px;
-      margin-top: 20px;
-      max-width: 500px;
-    }
-    label {
-      display: inline-block;
-      min-width: 70px;
-      margin-bottom: 5px;
-    }
-    input[type="number"], select {
-      width: 80px;
-      margin: 5px;
-    }
-    input[type="text"] {
-      width: 95%;
-      margin-top: 5px;
-    }
-    button {
+
+    /* טבלת המשחקים שהתקיימו */
+    #matchesList table {
       margin-top: 10px;
-      padding: 8px 16px;
-      cursor: pointer;
     }
-    .highlight {
-      font-weight: bold;
-      color: #d00;
+
+    .hidden {
+      display: none;
     }
   </style>
 </head>
 <body>
 
-  <h1>אפליקציית טורניר כדורגל</h1>
+<header>
+  <h1>ניהול טורניר - המפסיד יוצא</h1>
+</header>
 
-  <!-- הצגת האלופה ומלך השערים -->
-  <div id="championInfo"></div>
+<div class="container">
+  <!-- סרגל צד, מציג טבלת קבוצות מעודכנת-->
+  <div class="sidebar">
+    <h3>טבלת הקבוצות</h3>
+    <table id="teamsTable">
+      <thead>
+        <tr>
+          <th>קבוצה</th>
+          <th>צבע</th>
+          <th>נקודות</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- מתעדכן דינמית -->
+      </tbody>
+    </table>
 
-  <!-- טבלת ניקוד של הקבוצות -->
-  <h2>טבלת הליגה</h2>
-  <table id="teamsTable">
-    <thead>
-      <tr>
-        <th>קבוצה</th>
-        <th>צבע</th>
-        <th>נקודות</th>
-      </tr>
-    </thead>
-    <tbody>
-      <!-- ימולא דינמית ע"י JavaScript -->
-    </tbody>
-  </table>
-
-  <!-- טבלת מלך השערים -->
-  <h2>מלך השערים</h2>
-  <table id="scorersTable">
-    <thead>
-      <tr>
-        <th>שחקן</th>
-        <th>קבוצה</th>
-        <th>שערים</th>
-      </tr>
-    </thead>
-    <tbody>
-      <!-- ימולא דינמית ע"י JavaScript -->
-    </tbody>
-  </table>
-
-  <!-- עדכון תוצאות משחק -->
-  <div class="form-section">
-    <h3>הכנס תוצאת משחק</h3>
-    <form id="matchForm">
-      <div>
-        <label>קבוצה 1:</label>
-        <select id="team1Select"></select>
-        <label>שערים:</label>
-        <input type="number" id="team1Goals" min="0" value="0" required />
-      </div>
-      <div>
-        <label>קבוצה 2:</label>
-        <select id="team2Select"></select>
-        <label>שערים:</label>
-        <input type="number" id="team2Goals" min="0" value="0" required />
-      </div>
-      <div>
-        <label>כובשים קבוצה 1:</label><br>
-        <input 
-          type="text" 
-          id="team1Scorers" 
-          placeholder="הקלד שמות שחקנים (מופרדים בפסיק) למשל: 'משה, עמית'"
-        />
-      </div>
-      <div>
-        <label>כובשים קבוצה 2:</label><br>
-        <input 
-          type="text" 
-          id="team2Scorers" 
-          placeholder="הקלד שמות שחקנים (מופרדים בפסיק)"
-        />
-      </div>
-      <button type="submit">עדכן תוצאה</button>
-    </form>
+    <div id="championInfo"></div>
   </div>
 
-  <script>
-    // הגדרת הקבוצות
-    // כל קבוצה כוללת: שם, צבע, רשימת שחקנים (6), נקודות התחלתיות = 0
-    const teams = [
-      {
-        name: "קבוצה א",
-        color: "red",
-        players: ["שחקן א1","שחקן א2","שחקן א3","שחקן א4","שחקן א5","שחקן א6"],
-        points: 0
-      },
-      {
-        name: "קבוצה ב",
-        color: "blue",
-        players: ["שחקן ב1","שחקן ב2","שחקן ב3","שחקן ב4","שחקן ב5","שחקן ב6"],
-        points: 0
-      },
-      {
-        name: "קבוצה ג",
-        color: "green",
-        players: ["שחקן ג1","שחקן ג2","שחקן ג3","שחקן ג4","שחקן ג5","שחקן ג6"],
-        points: 0
-      }
-    ];
+  <!-- תוכן מרכזי -->
+  <div class="content">
+    <!-- שלב 1: הכנסת שמות השחקנים וחלוקה לקבוצות -->
+    <form id="initialSetupForm">
+      <h2>הכנס 18 שמות שחקנים</h2>
+      <p>
+        הכנס את השמות, מופרדים בשורה חדשה או בפסיק.
+        (תוכל לערוך את החלוקה ידנית בקוד, או בתהליך נוסף.)
+      </p>
+      <textarea class="players-input" id="playersInput"
+        placeholder="הכנס כאן 18 שמות..."></textarea>
+      <button type="submit">התחל טורניר</button>
+    </form>
 
-    // אובייקט לשמירת מספר שערים לכל שחקן { "שם שחקן": { goals: X, team: "שם קבוצה" } }
-    const scorers = {};
+    <!-- שלב 2: תצוגת המשחק הנוכחי / הבא -->
+    <div id="nextMatchSection" class="hidden">
+      <h2>משחק חדש</h2>
+      <p><strong>קבוצות מתמודדות:</strong> <span id="nextMatchTeams"></span></p>
+      <div>
+        <label>שערים קבוצה 1:
+          <input type="number" id="team1Goals" value="0" min="0" />
+        </label>
+        <label>שערים קבוצה 2:
+          <input type="number" id="team2Goals" value="0" min="0" />
+        </label>
+      </div>
+      <div>
+        <label>מבקיעים קבוצה 1 (מופרדים בפסיק):
+          <input type="text" id="team1Scorers" />
+        </label>
+        <label>מבקיעים קבוצה 2 (מופרדים בפסיק):
+          <input type="text" id="team2Scorers" />
+        </label>
+      </div>
+      <button id="finishMatchBtn">סיים משחק</button>
+    </div>
 
-    // עם טעינת הדף, נבנה את תפריטי הבחירה ואת הטבלאות ההתחלתיות
-    window.onload = () => {
-      fillTeamSelects();
-      updateTeamsTable();
-      updateScorersTable();
-      updateChampionAndTopScorer();
-    };
+    <!-- הצגת כל המשחקים שהתקיימו -->
+    <div id="matchesList">
+      <h2>משחקים שהתקיימו</h2>
+      <!-- נמלא טבלה של היסטוריית המשחקים -->
+      <table>
+        <thead>
+          <tr>
+            <th>משחק</th>
+            <th>תוצאה</th>
+            <th>עולה</th>
+          </tr>
+        </thead>
+        <tbody id="matchesTbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
 
-    // מילוי רשימת הקבוצות בתפריטי הבחירה
-    function fillTeamSelects() {
-      const team1Select = document.getElementById("team1Select");
-      const team2Select = document.getElementById("team2Select");
+<script>
+/* --------------------------------------------------------------------------
+  מבנה נתונים בסיסי:
+    teams = [
+      { name: "אדום", color: "red", players: [...], points: 0, isActive: true },
+      ...
+    ]
 
-      teams.forEach((team, index) => {
-        const option1 = document.createElement("option");
-        option1.value = index;
-        option1.textContent = team.name;
-        team1Select.appendChild(option1);
+  scorers = {
+    "שחקן X": { goals: 2, team: "אדום" }, ...
+  }
 
-        const option2 = document.createElement("option");
-        option2.value = index;
-        option2.textContent = team.name;
-        team2Select.appendChild(option2);
-      });
+  matches = [
+    {
+      team1Index: 0,
+      team2Index: 1,
+      goals1: 2,
+      goals2: 2,
+      winnerIndex: 0 (או 1 או null אם תיקו),
+      ...
     }
+  ]
+-------------------------------------------------------------------------- */
 
-    // עדכון טבלת הקבוצות (נקודות וכו')
-    function updateTeamsTable() {
-      const tbody = document.querySelector("#teamsTable tbody");
-      tbody.innerHTML = ""; // איפוס התוכן
+// נייצר מראש 3 קבוצות עם שמות וצבעים, בלי שחקנים בשלב זה
+let teams = [
+  { name: "קבוצה אדום",  color: "red",   players: [], points: 0, isActive: true },
+  { name: "קבוצה כחול",  color: "blue",  players: [], points: 0, isActive: true },
+  { name: "קבוצה ירוק",  color: "green", players: [], points: 0, isActive: true }
+];
 
-      teams.forEach(team => {
-        const tr = document.createElement("tr");
+// טבלת מבקיעים: { "שם שחקן": { goals: 0, team: "קבוצה אדום" } }
+let scorers = {};
 
-        // עמודת שם הקבוצה
-        const tdName = document.createElement("td");
-        tdName.textContent = team.name;
+// רשימת משחקים שכבר שוחקו
+let matches = [];
 
-        // עמודת צבע הקבוצה
-        const tdColor = document.createElement("td");
-        const colorBox = document.createElement("span");
-        colorBox.classList.add("teamColorBox");
-        colorBox.style.backgroundColor = team.color;
-        tdColor.textContent = team.color;
-        tdColor.appendChild(colorBox);
+// סדר המשחקים לפי שיטת "המפסיד יוצא" עם 3 קבוצות:
+// - משחק 1: teamIndices[0] vs teamIndices[1]
+// - המנצח (או עולה אחרי תיקו) -> משחק 2 נגד teamIndices[2]
+// את מי שישחק נגד מי אפשר להגדיר כתרחיש קבוע או דינמי.
+// כאן לצורך הדוגמה: קודם אדום מול ירוק, אח"כ המנצח מול כחול.
+let plannedMatches = [
+  [0, 2], // אדום vs ירוק
+  // המנצח מהמשחק הראשון עולה מול [1] (כחול)
+  // את המשחק השני נגדיר אח"כ כמנגנון דינמי
+];
+let currentMatchIndex = 0; // מצביע לאיזה משחק אנחנו עומדים לשחק.
 
-        // עמודת נקודות
-        const tdPoints = document.createElement("td");
-        tdPoints.textContent = team.points;
+// רפרנסים ל‑DOM
+const initialSetupForm = document.getElementById("initialSetupForm");
+const playersInput     = document.getElementById("playersInput");
 
-        tr.appendChild(tdName);
-        tr.appendChild(tdColor);
-        tr.appendChild(tdPoints);
+const nextMatchSection = document.getElementById("nextMatchSection");
+const nextMatchTeams   = document.getElementById("nextMatchTeams");
 
-        tbody.appendChild(tr);
-      });
-    }
+const team1GoalsInput  = document.getElementById("team1Goals");
+const team2GoalsInput  = document.getElementById("team2Goals");
+const team1ScorersInput= document.getElementById("team1Scorers");
+const team2ScorersInput= document.getElementById("team2Scorers");
+const finishMatchBtn   = document.getElementById("finishMatchBtn");
 
-    // עדכון טבלת מלך השערים
-    function updateScorersTable() {
-      const tbody = document.querySelector("#scorersTable tbody");
-      tbody.innerHTML = ""; // איפוס התוכן
+const teamsTableBody   = document.querySelector("#teamsTable tbody");
+const championInfo     = document.getElementById("championInfo");
+const matchesTbody     = document.getElementById("matchesTbody");
 
-      // ניצור מערך מהאובייקט scorers ואז נמיין לפי מספר השערים
-      const scorersArray = Object.keys(scorers).map(playerName => {
-        return {
-          name: playerName,
-          goals: scorers[playerName].goals,
-          team: scorers[playerName].team
-        };
-      });
+// עם טעינת הדף, נעדכן טבלה התחלתית
+window.onload = () => {
+  updateTeamsTable(); // מציג 3 קבוצות בלי שחקנים
+};
 
-      // מיון יורד לפי כמות שערים
-      scorersArray.sort((a, b) => b.goals - a.goals);
+/* ----------------------------------------------------------------------------
+  שלב 1: טופס פתיחה - מקבל 18 שמות, מחלק אותם (רנדומלית) לקבוצות
+---------------------------------------------------------------------------- */
+initialSetupForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+  // קרא את הטקסט מהטקסט-אריאה
+  let rawNames = playersInput.value.trim();
+  if (!rawNames) {
+    alert("לא הוזנו שמות שחקנים!");
+    return;
+  }
+  // נפצל לפי פסיק או שורה חדשה
+  let names = rawNames.split(/[\n,]+/).map(n => n.trim()).filter(n => n !== "");
+  if (names.length !== 18) {
+    alert("חובה להזין בדיוק 18 שמות.");
+    return;
+  }
 
-      // בניית שורות
-      scorersArray.forEach(scorer => {
-        const tr = document.createElement("tr");
-        const tdName = document.createElement("td");
-        const tdTeam = document.createElement("td");
-        const tdGoals = document.createElement("td");
+  // נערבב את המערך
+  shuffleArray(names);
 
-        tdName.textContent = scorer.name;
-        tdTeam.textContent = scorer.team;
-        tdGoals.textContent = scorer.goals;
+  // נחלק 6 שמות לכל קבוצה
+  teams[0].players = names.slice(0, 6);
+  teams[1].players = names.slice(6, 12);
+  teams[2].players = names.slice(12, 18);
 
-        tr.appendChild(tdName);
-        tr.appendChild(tdTeam);
-        tr.appendChild(tdGoals);
-        tbody.appendChild(tr);
-      });
-    }
+  // אפס נקודות וכל דבר
+  teams.forEach(t => t.points = 0);
 
-    // חישוב אלופה (המובילה בנקודות) ומלך השערים
-    function updateChampionAndTopScorer() {
-      // מציאת אלופה
-      let champion = teams[0];
-      teams.forEach(t => {
-        if (t.points > champion.points) {
-          champion = t;
-        }
-      });
+  // הסתרת טופס ההתחלה
+  initialSetupForm.classList.add("hidden");
 
-      // מציאת מלך השערים (השחקן עם הכי הרבה שערים)
-      let topScorerName = null;
-      let topScorerGoals = 0;
+  // הצגת המסך של המשחק הבא (המשחק הראשון).
+  showNextMatch();
+  updateTeamsTable();
+});
 
-      Object.keys(scorers).forEach(playerName => {
-        const g = scorers[playerName].goals;
-        if (g > topScorerGoals) {
-          topScorerGoals = g;
-          topScorerName = playerName;
-        }
-      });
-
-      const championInfo = document.getElementById("championInfo");
-      championInfo.innerHTML = "";
-
-      const championElem = document.createElement("p");
-      championElem.textContent = `אלופה נוכחית: ${champion.name} ( ${champion.points} נק')`;
-
-      championInfo.appendChild(championElem);
-
-      if (topScorerName) {
-        const topScorerElem = document.createElement("p");
-        topScorerElem.textContent = `מלך השערים הנוכחי: ${topScorerName} (${topScorerGoals} שערים)`;
-        championInfo.appendChild(topScorerElem);
-      } else {
-        const noScorerElem = document.createElement("p");
-        noScorerElem.textContent = "טרם הובקעו שערים.";
-        championInfo.appendChild(noScorerElem);
+/* ----------------------------------------------------------------------------
+  שלב 2: הצגת משחק נוכחי, עדכון תוצאה
+---------------------------------------------------------------------------- */
+function showNextMatch() {
+  // בדיקה האם יש עוד משחק מתוכנן
+  if (currentMatchIndex >= plannedMatches.length) {
+    // ייתכן שזה היה המשחק האחרון, או צריך ליצור משחק מול הקבוצה השלישית
+    // אם זה היה רק משחק 1, עכשיו מוסיפים משחק 2 לפי המנצחת.
+    if (matches.length === 1) {
+      // המשחק הראשון הסתיים, עלינו לתכנן את משחק הגמר
+      let winnerIndex = matches[0].winnerIndex;
+      if (winnerIndex === null) {
+        // תיקו, בחרנו עולה רנדומית, נשמור אותה ב‑match.winnerIndex
+        winnerIndex = matches[0].winnerIndexAfterTie;
       }
-    }
-
-    // האזנה לטופס עדכון תוצאות המשחק
-    const matchForm = document.getElementById("matchForm");
-    matchForm.addEventListener("submit", event => {
-      event.preventDefault();
-      const team1Index = parseInt(document.getElementById("team1Select").value);
-      const team2Index = parseInt(document.getElementById("team2Select").value);
-      const team1Goals = parseInt(document.getElementById("team1Goals").value);
-      const team2Goals = parseInt(document.getElementById("team2Goals").value);
-
-      // לא לאפשר משחק נגד אותה קבוצה
-      if (team1Index === team2Index) {
-        alert("בחר שתי קבוצות שונות!");
-        return;
-      }
-
-      const team1 = teams[team1Index];
-      const team2 = teams[team2Index];
-
-      // עדכון נקודות על פי תוצאה
-      if (team1Goals > team2Goals) {
-        // קבוצה 1 מנצחת
-        team1.points += 3;
-      } else if (team1Goals < team2Goals) {
-        // קבוצה 2 מנצחת
-        team2.points += 3;
-      } else {
-        // תיקו
-        team1.points += 1;
-        team2.points += 1;
-      }
-
-      // עדכון מבקיעים
-      const scorersTeam1 = document.getElementById("team1Scorers").value
-        .split(",")
-        .map(s => s.trim())
-        .filter(s => s !== "");
-      const scorersTeam2 = document.getElementById("team2Scorers").value
-        .split(",")
-        .map(s => s.trim())
-        .filter(s => s !== "");
-
-      // רישום שערים למבקיעים
-      scorersTeam1.forEach(name => {
-        addGoal(name, team1.name);
-      });
-      scorersTeam2.forEach(name => {
-        addGoal(name, team2.name);
-      });
-
-      // רענון הטבלאות
-      updateTeamsTable();
-      updateScorersTable();
-      updateChampionAndTopScorer();
-
-      // איפוס הטופס
-      matchForm.reset();
-      document.getElementById("team1Select").value = 0;
-      document.getElementById("team2Select").value = 1;
-    });
-
-    // פונקציה להוספת שער למבקיע
-    function addGoal(playerName, teamName) {
-      if (!scorers[playerName]) {
-        // אם השחקן לא קיים עדיין - נרשום אותו עם 1 שער
-        scorers[playerName] = {
-          goals: 1,
-          team: teamName
-        };
-      } else {
-        // אחרת - נעדכן את מספר השערים
-        scorers[playerName].goals += 1;
+      // המנצח ישחק מול הקבוצה הכחולה (אצלנו teams[1] = כחול)
+      // אבל בחרנו מראש איזשהו סדר? נניח שרצינו שהמנצח ישחק מול "כחול" ([1]).
+      // נראה מי זאת אותה קבוצה. אם winnerIndex הוא [0] או [2], נעשה match מול [1].
+      if (winnerIndex !== null) {
+        plannedMatches.push([winnerIndex, 1]); 
+        // עכשיו יש לנו match #2
       }
     }
+    // בדוק שוב אם יש לנו Match #2
+    if (currentMatchIndex >= plannedMatches.length) {
+      // אין עוד משחק -> כנראה הטורניר הסתיים
+      alert("הטורניר הסתיים! תוכל לראות את התוצאות בצד.");
+      nextMatchSection.classList.add("hidden");
+      return;
+    }
+  }
 
-  </script>
+  // קבל את צמד הקבוצות למשחק
+  const matchTeams = plannedMatches[currentMatchIndex];
+  const t1 = teams[matchTeams[0]];
+  const t2 = teams[matchTeams[1]];
+  if (!t1 || !t2) {
+    console.warn("לא נמצאו קבוצות למשחק הבא.");
+    nextMatchSection.classList.add("hidden");
+    return;
+  }
+
+  // הצגה
+  nextMatchTeams.textContent = `${t1.name} נגד ${t2.name}`;
+  team1GoalsInput.value = 0;
+  team2GoalsInput.value = 0;
+  team1ScorersInput.value = "";
+  team2ScorersInput.value = "";
+
+  nextMatchSection.classList.remove("hidden");
+}
+
+finishMatchBtn.addEventListener("click", () => {
+  // סיום משחק, עדכון תוצאות
+  const matchTeams = plannedMatches[currentMatchIndex];
+  const t1Index = matchTeams[0];
+  const t2Index = matchTeams[1];
+  const t1 = teams[t1Index];
+  const t2 = teams[t2Index];
+
+  let g1 = parseInt(team1GoalsInput.value) || 0;
+  let g2 = parseInt(team2GoalsInput.value) || 0;
+
+  // עדכון נקודות
+  let winnerIndex = null;
+  if (g1 > g2) {
+    t1.points += 3;  // ניצחון
+    winnerIndex = t1Index;
+  } else if (g2 > g1) {
+    t2.points += 3;  // ניצחון
+    winnerIndex = t2Index;
+  } else {
+    // תיקו
+    t1.points += 1;
+    t2.points += 1;
+    // בהגרלה נבחר מי עולה
+    let randomChoice = Math.random() < 0.5 ? t1Index : t2Index;
+    winnerIndex = null;  // לציון ששני הצדדים תיקו
+  }
+
+  // עדכון מבקיעים
+  let scorersTeam1 = team1ScorersInput.value
+    .split(",")
+    .map(s => s.trim())
+    .filter(s => s !== "");
+  let scorersTeam2 = team2ScorersInput.value
+    .split(",")
+    .map(s => s.trim())
+    .filter(s => s !== "");
+
+  scorersTeam1.forEach(name => addGoal(name, t1.name));
+  scorersTeam2.forEach(name => addGoal(name, t2.name));
+
+  // שמירת המשחק ב‑matches
+  let thisMatch = {
+    team1Index: t1Index,
+    team2Index: t2Index,
+    goals1: g1,
+    goals2: g2,
+    winnerIndex: winnerIndex,
+  };
+  if (g1 === g2) {
+    let randomChoice = Math.random() < 0.5 ? t1Index : t2Index;
+    thisMatch.winnerIndexAfterTie = randomChoice;
+  }
+  matches.push(thisMatch);
+
+  // עדכון טבלאות ותצוגה
+  updateTeamsTable();
+  updateMatchesList();
+  updateChampionInfo(); // להציג מי מוביל
+
+  // מתקדם למחשב הבא
+  currentMatchIndex++;
+
+  // מציג את המשחק הבא (אם יש)
+  showNextMatch();
+});
+
+/* ----------------------------------------------------------------------------
+   עדכון טבלת קבוצות בצד
+---------------------------------------------------------------------------- */
+function updateTeamsTable() {
+  teamsTableBody.innerHTML = "";
+  teams.forEach(team => {
+    const tr = document.createElement("tr");
+    const tdName = document.createElement("td");
+    const tdColor= document.createElement("td");
+    const tdPoints = document.createElement("td");
+
+    tdName.textContent = team.name;
+    tdColor.textContent = team.color;
+    let colorBox = document.createElement("span");
+    colorBox.className = "teamColorBox";
+    colorBox.style.backgroundColor = team.color;
+    tdColor.appendChild(colorBox);
+
+    tdPoints.textContent = team.points;
+
+    tr.appendChild(tdName);
+    tr.appendChild(tdColor);
+    tr.appendChild(tdPoints);
+    teamsTableBody.appendChild(tr);
+  });
+}
+
+/* ----------------------------------------------------------------------------
+   עדכון רשימת המשחקים שהתקיימו
+---------------------------------------------------------------------------- */
+function updateMatchesList() {
+  matchesTbody.innerHTML = "";
+  matches.forEach((m, i) => {
+    let t1 = teams[m.team1Index];
+    let t2 = teams[m.team2Index];
+    let row = document.createElement("tr");
+
+    let tdMatch = document.createElement("td");
+    tdMatch.textContent = `משחק ${i+1}: ${t1.name} - ${t2.name}`;
+
+    let tdResult = document.createElement("td");
+    tdResult.textContent = `${m.goals1} : ${m.goals2}`;
+
+    let tdAdvance = document.createElement("td");
+    if (m.winnerIndex !== null) {
+      tdAdvance.textContent = teams[m.winnerIndex].name;
+    } else {
+      // היה תיקו
+      let winnerIdx = m.winnerIndexAfterTie;
+      tdAdvance.textContent = `תיקו => ${teams[winnerIdx].name} (בהגרלה)`;
+    }
+
+    row.appendChild(tdMatch);
+    row.appendChild(tdResult);
+    row.appendChild(tdAdvance);
+    matchesTbody.appendChild(row);
+  });
+}
+
+/* ----------------------------------------------------------------------------
+   הצגת אלופה נוכחית (הקבוצה עם הכי הרבה נקודות), ואם הטורניר נגמר
+---------------------------------------------------------------------------- */
+function updateChampionInfo() {
+  championInfo.innerHTML = "";
+  let champion = teams[0];
+  teams.forEach(t => {
+    if (t.points > champion.points) {
+      champion = t;
+    }
+  });
+  // מציג "אלופה נוכחית"
+  let p = document.createElement("p");
+  p.textContent = `אלופה נוכחית (נקודות): ${champion.name} (${champion.points})`;
+  championInfo.appendChild(p);
+}
+
+/* ----------------------------------------------------------------------------
+   עדכון מבקיעים
+---------------------------------------------------------------------------- */
+function addGoal(playerName, teamName) {
+  if (!scorers[playerName]) {
+    scorers[playerName] = { goals: 1, team: teamName };
+  } else {
+    scorers[playerName].goals += 1;
+  }
+}
+
+/* ----------------------------------------------------------------------------
+   עזר: מערבב מערך בצורה אקראית (Fisher-Yates)
+---------------------------------------------------------------------------- */
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    let j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
+</script>
 </body>
 </html>
