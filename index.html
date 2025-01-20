@@ -8,10 +8,13 @@
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700&family=Roboto+Mono:wght@500&display=swap" rel="stylesheet">
 
   <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
 
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -27,6 +30,9 @@
       --background-color: #f5f5f5;
       --text-color: #333;
       --card-bg: #ffffff;
+      --timer-color: #28a745;
+      --timer-warning-color: #ffc107;
+      --timer-danger-color: #dc3545;
     }
 
     [data-theme="dark"] {
@@ -36,6 +42,9 @@
       --background-color: #212529;
       --text-color: #f8f9fa;
       --card-bg: #2b3035;
+      --timer-color: #198754;
+      --timer-warning-color: #ffc107;
+      --timer-danger-color: #dc3545;
     }
 
     body {
@@ -112,6 +121,49 @@
       border-style: solid;
     }
 
+    .match-timer-container {
+      background: var(--card-bg);
+      padding: 1.5rem;
+      border-radius: 12px;
+      text-align: center;
+      margin-bottom: 2rem;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .match-timer {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 4rem;
+      font-weight: bold;
+      color: var(--timer-color);
+      text-shadow: 0 0 10px rgba(var(--primary-color-rgb), 0.2);
+      transition: all 0.3s ease;
+      margin-bottom: 1rem;
+    }
+
+    .match-timer.warning {
+      color: var(--timer-warning-color);
+      animation: pulse 1s infinite;
+    }
+
+    .match-timer.extra-time {
+      color: var(--timer-danger-color);
+      animation: pulse 1s infinite;
+    }
+
+    .match-timer.end {
+      animation: endGame 0.5s infinite alternate;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.05); opacity: 0.8; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    @keyframes endGame {
+      from { transform: scale(1); }
+      to { transform: scale(1.1); }
+    }
     .dark-mode-toggle {
       position: fixed;
       bottom: 20px;
@@ -143,6 +195,29 @@
       color: var(--text-color);
     }
 
+    .timer-controls {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    .timer-controls .btn {
+      min-width: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+    }
+
+    .timer-controls .btn i {
+      font-size: 1.2em;
+    }
+
+    .timer-controls .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
     @media (max-width: 768px) {
       .container {
         padding: 10px;
@@ -160,10 +235,23 @@
       .table-responsive {
         font-size: 0.9em;
       }
+
+      .match-timer {
+        font-size: 3rem;
+      }
+
+      .timer-controls {
+        flex-direction: column;
+      }
+
+      .timer-controls .btn {
+        width: 100%;
+      }
     }
   </style>
 </head>
 <body>
+
 <!-- Navigation Bar -->
 <nav class="navbar navbar-dark bg-primary">
   <div class="container-fluid">
@@ -221,7 +309,6 @@
       </form>
     </div>
   </div>
-
   <!-- Screen 3: Team Definition -->
   <div id="screenDefineTeams" class="screen">
     <div class="card p-4">
@@ -254,6 +341,25 @@
   <div id="screenTournament" class="screen">
     <div class="card p-4">
       <h3 class="mb-4">ניהול הטורניר</h3>
+
+      <!-- Match Timer -->
+      <div class="match-timer-container">
+        <div class="match-timer" id="matchTimer">00:00</div>
+        <div class="timer-controls">
+          <button class="btn btn-success" id="startTimerBtn">
+            <i class="bi bi-play-fill"></i>
+            התחל
+          </button>
+          <button class="btn btn-warning" id="pauseTimerBtn" disabled>
+            <i class="bi bi-pause-fill"></i>
+            עצור
+          </button>
+          <button class="btn btn-danger" id="resetTimerBtn">
+            <i class="bi bi-arrow-counterclockwise"></i>
+            אפס
+          </button>
+        </div>
+      </div>
       
       <!-- Teams Table -->
       <div class="table-container">
@@ -324,14 +430,6 @@
           </table>
         </div>
       </div>
-
-      <!-- Goals Chart -->
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">גרף שערים</h5>
-          <canvas id="goalsChart"></canvas>
-        </div>
-      </div>
     </div>
   </div>
 </div>
@@ -354,7 +452,18 @@ let activeTeams = [];
 let waitingTeams = [];
 let matches = [];
 let scorers = {};
-let goalsChart = null;
+
+// Timer Variables
+let matchTimer = null;
+let matchTimeSeconds = 0;
+let isTimerRunning = false;
+let isExtraTime = false;
+const MATCH_DURATION = 8 * 60; // 8 דקות בשניות
+const EXTRA_TIME = 60; // דקה נוספת בשניות
+const WARNING_TIME = 60; // התראה דקה לפני הסיום
+
+// צליל התראה
+const alarmSound = new Audio('data:audio/wav;base64,//uQRAAAAWMSLwUIYAAsYkXgoQwAEaYLWfkWgAI0wWs/ItAAAGDgYtAgAyN+QWaAAihwMWm4G8QQRDiMcCBcH3Cc+CDv/7xA4Tvh9Rz/y8QADBwMWgQAZG/ILNAARQ4GLTcDeIIIhxGOBAuD7hOfBB3/94gcJ3w+o5/5eIAIAAAVwWgQAVQ2ORaIQwEMAJiDg95G4nQL7mQVWI6GwRcfsZAcsKkJvxgxEjzFUgfHoSQ9Qq7KNwqHwuB13MA4a1q/DmBrHgPcmjiGoh//EwC5nGPEmS4RcfkVKOhJf+WOgoxJclFz3kgn//dBA+ya1GhurNn8zb//9NNutNuhz31f////9vt///z+IdAEAAAK4LQIAKobHItEIYCGAExBwe8jcToF9zIKrEdDYIuP2MgOWFSE34wYiR5iqQPj0JIeoVdlG4VD4XA67mAcNa1fhzA1jwHuTRxDUQ//iYBczjHiTJcIuPyKlHQkv/LHQUYkuSi57yQT//uggfZNajQ3Vmz+Zt//+mm3Wm3Q576v////+32///5/EOgAAADVghQAAAAA==');
 
 // Form Validation
 function validateForm(form) {
@@ -391,392 +500,159 @@ function initializeDarkMode() {
   });
 }
 
-// Teams Management
-function setupTeamsArray() {
-  teams = [];
-  for (let i = 0; i < numTeams; i++) {
-    teams.push({
-      name: `קבוצה ${i+1}`,
-      color: getRandomColor(),
-      players: [],
-      w: 0, d: 0, l: 0,
-      gf: 0, ga: 0, gd: 0,
-      points: 0
-    });
+// Match Timer Management
+function initializeMatchTimer() {
+  const timerDisplay = document.getElementById('matchTimer');
+  const startBtn = document.getElementById('startTimerBtn');
+  const pauseBtn = document.getElementById('pauseTimerBtn');
+  const resetBtn = document.getElementById('resetTimerBtn');
+
+  function playAlarm() {
+    alarmSound.play();
   }
-}
 
-function getRandomColor() {
-  const letters = '0123456789ABCDEF';
-  let color = '#';
-  for (let i = 0; i < 6; i++) {
-    color += letters[Math.floor(Math.random() * 16)];
-  }
-  return color;
-}
+  function updateTimerDisplay() {
+    const minutes = Math.floor(matchTimeSeconds / 60).toString().padStart(2, '0');
+    const seconds = (matchTimeSeconds % 60).toString().padStart(2, '0');
+    timerDisplay.textContent = `${minutes}:${seconds}`;
 
-// Drag & Drop Implementation
-function initializeDragAndDrop() {
-  const containers = document.querySelectorAll('.team-container');
-  containers.forEach(container => {
-    new Sortable(container, {
-      group: {
-        name: 'shared',
-        pull: true,
-        put: true
-      },
-      animation: 150,
-      ghostClass: 'sortable-ghost',
-      dragClass: 'sortable-drag',
-      onEnd: (evt) => {
-        validateTeamSizes();
-        
-        // עדכון רשימת השחקנים בקבוצות
-        teams.forEach((team, idx) => {
-          const container = document.getElementById(`team-${idx}`);
-          if (container) {
-            team.players = Array.from(container.querySelectorAll('.draggable-player'))
-              .map(p => p.textContent.trim());
-          }
-        });
-      }
-    });
-  });
-}
-
-function renderPlayerAssignment() {
-  const unassignedContainer = document.getElementById('unassignedPlayers');
-  const teamContainers = document.getElementById('teamContainers');
-  
-  // ניקוי מיכלים
-  unassignedContainer.innerHTML = '';
-  teamContainers.innerHTML = '';
-  
-  // הוספת שחקנים לא משובצים
-  playersPool.forEach(player => {
-    const playerDiv = document.createElement('div');
-    playerDiv.className = 'draggable-player';
-    playerDiv.textContent = player;
-    playerDiv.setAttribute('draggable', 'true');
-    unassignedContainer.appendChild(playerDiv);
-  });
-  
-  // יצירת מיכלי קבוצות
-  teams.forEach((team, idx) => {
-    const teamDiv = document.createElement('div');
-    teamDiv.className = 'mb-3';
-    teamDiv.innerHTML = `
-      <h5>${team.name}</h5>
-      <div id="team-${idx}" class="team-container" data-team-id="${idx}"></div>
-    `;
-    teamContainers.appendChild(teamDiv);
-  });
-
-  // הפעלת Drag & Drop
-  initializeDragAndDrop();
-}
-
-function validateTeamSizes() {
-  const teamContainers = document.querySelectorAll('#teamContainers .team-container');
-  let isValid = true;
-  
-  teams.forEach((team, idx) => {
-    const container = document.getElementById(`team-${idx}`);
-    const players = container.querySelectorAll('.draggable-player');
-    team.players = Array.from(players).map(p => p.textContent);
-    
-    if (players.length !== playersPerTeam) {
-      isValid = false;
+    // בדיקת זמנים להשמעת התראות
+    if (matchTimeSeconds === MATCH_DURATION - WARNING_TIME) { // דקה לפני הסיום
+      playAlarm();
+      timerDisplay.classList.add('warning');
     }
-  });
-  
-  document.getElementById('finishAssignBtn').disabled = !isValid;
-  return isValid;
-}
-
-function renderTeamsDefinition() {
-  const container = document.getElementById('teamsDefinition');
-  container.innerHTML = '';
-  
-  teams.forEach((team, idx) => {
-    const teamDiv = document.createElement('div');
-    teamDiv.className = 'mb-3 p-3 border rounded';
-    teamDiv.innerHTML = `
-      <div class="mb-2">
-        <label class="form-label">שם קבוצה ${idx + 1}:</label>
-        <input type="text" class="form-control" value="${team.name}">
-      </div>
-      <div>
-        <label class="form-label">צבע קבוצה:</label>
-        <input type="color" class="form-control form-control-color" value="${team.color}">
-      </div>
-    `;
-
-    const nameInput = teamDiv.querySelector('input[type="text"]');
-    const colorInput = teamDiv.querySelector('input[type="color"]');
-
-    nameInput.addEventListener('change', () => {
-      teams[idx].name = nameInput.value || `קבוצה ${idx + 1}`;
-    });
-
-    colorInput.addEventListener('change', () => {
-      teams[idx].color = colorInput.value;
-    });
-
-    container.appendChild(teamDiv);
-  });
-}
-  // Tournament Management
-function prepareTournament() {
-  // Reset tournament state
-  matches = [];
-  scorers = {};
-  
-  // Initialize active teams (first two teams)
-  activeTeams = [0, 1];
-  
-  // Rest of teams go to waiting list
-  waitingTeams = [];
-  for (let i = 2; i < teams.length; i++) {
-    waitingTeams.push(i);
-  }
-
-  // Initialize statistics
-  teams.forEach(team => {
-    team.w = 0;
-    team.d = 0;
-    team.l = 0;
-    team.gf = 0;
-    team.ga = 0;
-    team.gd = 0;
-    team.points = 0;
-  });
-
-  // Initialize chart
-  initializeGoalsChart();
-  
-  // Render initial state
-  updateTeamsTable();
-  updateScorersTable();
-  renderCurrentMatch();
-}
-
-function initializeGoalsChart() {
-  const ctx = document.getElementById('goalsChart').getContext('2d');
-  goalsChart = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: [],
-      datasets: [{
-        label: 'שערים למשחק',
-        data: [],
-        borderColor: 'rgb(75, 192, 192)',
-        tension: 0.1
-      }]
-    },
-    options: {
-      responsive: true,
-      scales: {
-        y: {
-          beginAtZero: true
-        }
-      }
+    else if (matchTimeSeconds === MATCH_DURATION) { // סיום 8 דקות
+      playAlarm();
+      timerDisplay.classList.remove('warning');
+      timerDisplay.classList.add('extra-time');
+      isExtraTime = true;
     }
-  });
-}
-
-function updateTeamsTable() {
-  const tbody = document.getElementById('teamsTableBody');
-  tbody.innerHTML = '';
-
-  // Sort teams by points, then goal difference
-  const sortedTeams = teams.map((team, idx) => ({...team, originalIndex: idx}))
-    .sort((a, b) => {
-      if (b.points !== a.points) return b.points - a.points;
-      if (b.gd !== a.gd) return b.gd - a.gd;
-      return b.gf - a.gf;
-    });
-
-  sortedTeams.forEach((team, rank) => {
-    const row = document.createElement('tr');
-    row.innerHTML = `
-      <td>${team.name}</td>
-      <td>
-        <span style="display:inline-block;width:20px;height:20px;background:${team.color};border-radius:50%"></span>
-      </td>
-      <td>${team.w}</td>
-      <td>${team.d}</td>
-      <td>${team.l}</td>
-      <td>${team.gf}</td>
-      <td>${team.ga}</td>
-      <td>${team.gd}</td>
-      <td>${team.points}</td>
-      <td>${rank + 1}</td>
-    `;
-    tbody.appendChild(row);
-  });
-}
-
-function updateScorersTable() {
-  const tbody = document.getElementById('scorersTableBody');
-  tbody.innerHTML = '';
-
-  // Sort scorers by goals
-  const sortedScorers = Object.entries(scorers)
-    .map(([name, data]) => ({name, ...data}))
-    .sort((a, b) => b.goals - a.goals);
-
-  sortedScorers.forEach(scorer => {
-    const row = document.createElement('tr');
-    row.innerHTML = `
-      <td>${scorer.name}</td>
-      <td>${scorer.team}</td>
-      <td>${scorer.goals}</td>
-    `;
-    tbody.appendChild(row);
-  });
-}
-
-function renderCurrentMatch() {
-  const container = document.getElementById('currentMatchTeams');
-  const title = document.getElementById('currentMatchTitle');
-  
-  if (activeTeams.length < 2) {
-    title.textContent = 'הטורניר הסתיים!';
-    container.innerHTML = '<div class="col text-center">כל המשחקים הסתיימו</div>';
-    document.getElementById('submitMatchBtn').disabled = true;
-    return;
+    else if (isExtraTime && matchTimeSeconds === MATCH_DURATION + EXTRA_TIME) { // סיום דקת הארכה
+      playAlarm();
+      pauseTimer();
+      timerDisplay.classList.add('end');
+      alert('סיום המשחק!');
+    }
   }
-
-  const teamA = teams[activeTeams[0]];
-  const teamB = teams[activeTeams[1]];
-  title.textContent = `${teamA.name} נגד ${teamB.name}`;
-
-  container.innerHTML = `
-    <div class="col-md-6">
-      <h6>${teamA.name}</h6>
-      <div id="teamAPlayers"></div>
-    </div>
-    <div class="col-md-6">
-      <h6>${teamB.name}</h6>
-      <div id="teamBPlayers"></div>
-    </div>
-  `;
-
-  // Render player score controls
-  ['A', 'B'].forEach((team, idx) => {
-    const teamContainer = document.getElementById(`team${team}Players`);
-    teams[activeTeams[idx]].players.forEach(player => {
-      const playerDiv = document.createElement('div');
-      playerDiv.className = 'draggable-player';
-      playerDiv.innerHTML = `
-        <div class="d-flex justify-content-between align-items-center">
-          <span>${player}</span>
-          <div class="btn-group">
-            <button class="btn btn-sm btn-outline-secondary" onclick="updatePlayerScore('${player}', -1)">-</button>
-            <span class="btn btn-sm" data-player="${player}">0</span>
-            <button class="btn btn-sm btn-outline-secondary" onclick="updatePlayerScore('${player}', 1)">+</button>
-          </div>
-        </div>
-      `;
-      teamContainer.appendChild(playerDiv);
-    });
-  });
-}
-
-function finishCurrentMatch() {
-  const teamAGoals = Array.from(document.querySelectorAll('#teamAPlayers [data-player]'))
-    .reduce((sum, span) => sum + (parseInt(span.textContent) || 0), 0);
-    
-  const teamBGoals = Array.from(document.querySelectorAll('#teamBPlayers [data-player]'))
-    .reduce((sum, span) => sum + (parseInt(span.textContent) || 0), 0);
-
-  // Update team statistics
-  const teamA = teams[activeTeams[0]];
-  const teamB = teams[activeTeams[1]];
-
-  teamA.gf += teamAGoals;
-  teamA.ga += teamBGoals;
-  teamB.gf += teamBGoals;
-  teamB.ga += teamAGoals;
-
-  if (teamAGoals > teamBGoals) {
-    teamA.w++; teamA.points += 3;
-    teamB.l++;
-    handleMatchEnd(activeTeams[0], activeTeams[1]);
-  } else if (teamBGoals > teamAGoals) {
-    teamB.w++; teamB.points += 3;
-    teamA.l++;
-    handleMatchEnd(activeTeams[1], activeTeams[0]);
-  } else {
-    teamA.d++; teamA.points++;
-    teamB.d++; teamB.points++;
-    // Handle tie with prompt
-    const tieWinner = confirm(`תיקו! האם ${teamA.name} מנצחת בהגרלה?`) ? 
-      activeTeams[0] : activeTeams[1];
-    handleMatchEnd(tieWinner, tieWinner === activeTeams[0] ? activeTeams[1] : activeTeams[0]);
-  }
-
-  // Update goal differences
-  teamA.gd = teamA.gf - teamA.ga;
-  teamB.gd = teamB.gf - teamB.ga;
-
-  // Update scorers
-  document.querySelectorAll('[data-player]').forEach(span => {
-    const goals = parseInt(span.textContent) || 0;
-    if (goals > 0) {
-      const playerName = span.dataset.player;
-      const teamName = span.closest('#teamAPlayers') ? teamA.name : teamB.name;
+  function startTimer() {
+    if (!isTimerRunning) {
+      isTimerRunning = true;
+      matchTimer = setInterval(() => {
+        matchTimeSeconds++;
+        updateTimerDisplay();
+        saveMatchState();
+      }, 1000);
       
-      if (!scorers[playerName]) {
-        scorers[playerName] = { goals: 0, team: teamName };
-      }
-      scorers[playerName].goals += goals;
+      startBtn.disabled = true;
+      pauseBtn.disabled = false;
+      resetBtn.disabled = true;
+    }
+  }
+
+  function pauseTimer() {
+    if (isTimerRunning) {
+      isTimerRunning = false;
+      clearInterval(matchTimer);
+      
+      startBtn.disabled = false;
+      pauseBtn.disabled = true;
+      resetBtn.disabled = false;
+    }
+  }
+
+  function resetTimer() {
+    pauseTimer();
+    matchTimeSeconds = 0;
+    isExtraTime = false;
+    timerDisplay.classList.remove('warning', 'extra-time', 'end');
+    updateTimerDisplay();
+    
+    startBtn.disabled = false;
+    pauseBtn.disabled = true;
+    resetBtn.disabled = true;
+  }
+
+  // Event Listeners
+  startBtn.addEventListener('click', startTimer);
+  pauseBtn.addEventListener('click', pauseTimer);
+  resetBtn.addEventListener('click', () => {
+    if (confirm('האם אתה בטוח שברצונך לאפס את הטיימר?')) {
+      resetTimer();
     }
   });
 
-  // Update chart
-  if (goalsChart) {
-    goalsChart.data.labels.push(`משחק ${matches.length + 1}`);
-    goalsChart.data.datasets[0].data.push(teamAGoals + teamBGoals);
-    goalsChart.update();
-  }
-
-  // Save state and update UI
-  saveCurrentState();
-  updateTeamsTable();
-  updateScorersTable();
-  renderCurrentMatch();
-}
-
-function handleMatchEnd(winnerIdx, loserIdx) {
-  matches.push({
-    matchNumber: matches.length + 1,
-    teamA: activeTeams[0],
-    teamB: activeTeams[1],
-    winner: winnerIdx
+  // Keyboard Shortcuts
+  document.addEventListener('keydown', (e) => {
+    if (document.getElementById('matchTimer')) {
+      switch(e.code) {
+        case 'Space':
+          e.preventDefault();
+          if (isTimerRunning) {
+            pauseTimer();
+          } else {
+            startTimer();
+          }
+          break;
+        case 'KeyR':
+          if (e.ctrlKey) {
+            e.preventDefault();
+            resetBtn.click();
+          }
+          break;
+      }
+    }
   });
 
-  // Move loser to waiting if there are waiting teams
-  if (waitingTeams.length > 0) {
-    const nextTeam = waitingTeams.shift();
-    const loserActiveIndex = activeTeams.indexOf(loserIdx);
-    activeTeams[loserActiveIndex] = nextTeam;
-    waitingTeams.push(loserIdx);
-  } else {
-    // Remove loser if no waiting teams
-    activeTeams = activeTeams.filter(idx => idx !== loserIdx);
+  // אתחול התצוגה הראשונית
+  updateTimerDisplay();
+  pauseBtn.disabled = true;
+  resetBtn.disabled = true;
+}
+
+// State Management
+function saveMatchState() {
+  const state = {
+    numTeams,
+    playersPerTeam,
+    totalPlayers,
+    playersPool,
+    teams,
+    matches,
+    scorers,
+    matchTimeSeconds,
+    isTimerRunning,
+    isExtraTime,
+    activeTeams,
+    waitingTeams
+  };
+  localStorage.setItem('tournamentState', JSON.stringify(state));
+}
+
+function loadSavedState() {
+  try {
+    const savedState = localStorage.getItem('tournamentState');
+    if (savedState) {
+      const state = JSON.parse(savedState);
+      numTeams = state.numTeams;
+      playersPerTeam = state.playersPerTeam;
+      totalPlayers = state.totalPlayers;
+      playersPool = state.playersPool;
+      teams = state.teams;
+      matches = state.matches;
+      scorers = state.scorers;
+      matchTimeSeconds = state.matchTimeSeconds || 0;
+      isTimerRunning = state.isTimerRunning || false;
+      isExtraTime = state.isExtraTime || false;
+      activeTeams = state.activeTeams || [];
+      waitingTeams = state.waitingTeams || [];
+      return true;
+    }
+  } catch (error) {
+    console.error('Error loading saved state:', error);
   }
+  return false;
 }
-
-function updatePlayerScore(playerName, change) {
-  const scoreSpan = document.querySelector(`[data-player="${playerName}"]`);
-  let currentScore = parseInt(scoreSpan.textContent) || 0;
-  currentScore = Math.max(0, currentScore + change);
-  scoreSpan.textContent = currentScore;
-}
-
-// Initialize Event Listeners
+  // Initialize Event Listeners
 function initializeEventListeners() {
   // Config Form
   document.getElementById('configForm').addEventListener('submit', (e) => {
@@ -818,15 +694,11 @@ function initializeEventListeners() {
   // Finish Assignment Button
   document.getElementById('finishAssignBtn').addEventListener('click', () => {
     if (validateTeamSizes()) {
-      prepareTournament();
-      showScreen('screenTournament');
+      initializeFirstMatch();
     } else {
       alert(`כל קבוצה חייבת להכיל בדיוק ${playersPerTeam} שחקנים!`);
     }
   });
-
-  // Submit Match Button
-  document.getElementById('submitMatchBtn').addEventListener('click', finishCurrentMatch);
 
   // End Tournament Button
   document.getElementById('endTournamentBtn').addEventListener('click', () => {
@@ -837,42 +709,94 @@ function initializeEventListeners() {
   });
 }
 
-// State Management
-function saveCurrentState() {
-  const state = {
-    numTeams,
-    playersPerTeam,
-    totalPlayers,
-    playersPool,
-    teams,
-    matches,
-    scorers,
-    activeTeams,
-    waitingTeams
-  };
-  localStorage.setItem('tournamentState', JSON.stringify(state));
+// First Match Selection
+function initializeFirstMatch() {
+  const selectFirstMatchHTML = `
+    <div class="modal fade" id="selectFirstMatchModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">בחירת משחק ראשון</h5>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label">קבוצה ראשונה:</label>
+              <select class="form-select" id="firstTeamSelect">
+                ${teams.map((t, i) => `<option value="${i}">${t.name}</option>`).join('')}
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">קבוצה שניה:</label>
+              <select class="form-select" id="secondTeamSelect">
+                ${teams.map((t, i) => `<option value="${i}">${t.name}</option>`).join('')}
+              </select>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-primary" onclick="startTournamentWithTeams()">
+              התחל טורניר
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  document.body.insertAdjacentHTML('beforeend', selectFirstMatchHTML);
+  const modal = new bootstrap.Modal(document.getElementById('selectFirstMatchModal'));
+  modal.show();
 }
 
-function loadSavedState() {
-  try {
-    const savedState = localStorage.getItem('tournamentState');
-    if (savedState) {
-      const state = JSON.parse(savedState);
-      numTeams = state.numTeams;
-      playersPerTeam = state.playersPerTeam;
-      totalPlayers = state.totalPlayers;
-      playersPool = state.playersPool;
-      teams = state.teams;
-      matches = state.matches;
-      scorers = state.scorers;
-      activeTeams = state.activeTeams;
-      waitingTeams = state.waitingTeams;
-      return true;
-    }
-  } catch (error) {
-    console.error('Error loading saved state:', error);
+function startTournamentWithTeams() {
+  const firstTeam = parseInt(document.getElementById('firstTeamSelect').value);
+  const secondTeam = parseInt(document.getElementById('secondTeamSelect').value);
+  
+  if (firstTeam === secondTeam) {
+    alert('יש לבחור שתי קבוצות שונות');
+    return;
   }
-  return false;
+
+  // הגדרת הקבוצות הפעילות והממתינות
+  activeTeams = [firstTeam, secondTeam];
+  waitingTeams = teams.map((_, i) => i).filter(i => !activeTeams.includes(i));
+
+  // איפוס סטטיסטיקות
+  teams.forEach(team => {
+    team.w = 0; team.d = 0; team.l = 0;
+    team.gf = 0; team.ga = 0; team.gd = 0;
+    team.points = 0;
+  });
+
+  document.getElementById('selectFirstMatchModal').remove();
+  showScreen('screenTournament');
+  initializeMatchTimer();
+  updateTeamsTable();
+  updateScorersTable();
+  renderCurrentMatch();
+}
+
+// Teams & Player Assignment
+function setupTeamsArray() {
+  teams = [];
+  for (let i = 0; i < numTeams; i++) {
+    teams.push({
+      name: `קבוצה ${i+1}`,
+      color: getRandomColor(),
+      players: [],
+      w: 0, d: 0, l: 0,
+      gf: 0, ga: 0, gd: 0,
+      points: 0
+    });
+  }
+}
+
+function getRandomColor() {
+  const letters = '0123456789ABCDEF';
+  let color = '#';
+  for (let i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)];
+  }
+  return color;
 }
 
 // Initialize Application
@@ -884,6 +808,7 @@ document.addEventListener('DOMContentLoaded', () => {
     showScreen('screenConfig');
   } else {
     showScreen('screenTournament');
+    initializeMatchTimer();
     updateTeamsTable();
     updateScorersTable();
     renderCurrentMatch();
