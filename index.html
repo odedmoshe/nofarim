@@ -156,7 +156,7 @@
             pointer-events: auto;
         }
     </style>
-     <style>
+      <style>
         /* Buttons */
         .btn {
             border-radius: 0.75rem;
@@ -239,18 +239,17 @@
             animation: endGame 0.5s infinite alternate;
         }
 
-        /* Team & Player Styles */
-         .team-container {
-            min-height: auto; /* Adjusted min-height */
-            border: 2px dashed var(--primary-color);
-            padding: 0.5rem; /* Adjusted padding */
-            margin: 0.5rem 0; /* Adjusted margin */
-            border-radius: var(--card-radius);
-            background: rgba(var(--primary-color-rgb), 0.05);
-            transition: all var(--transition-normal);
-             display: flex;
-             flex-direction: column;
-             
+         /* Team & Player Styles */
+        .team-container {
+          min-height: auto; /* Adjusted min-height */
+           border: 2px dashed var(--primary-color);
+           padding: 0.5rem; /* Adjusted padding */
+           margin: 0.5rem 0; /* Adjusted margin */
+           border-radius: var(--card-radius);
+           background: rgba(var(--primary-color-rgb), 0.05);
+           transition: all var(--transition-normal);
+            display: flex;
+            flex-direction: column;
             
         }
 
@@ -262,8 +261,8 @@
              margin: 0.25rem; /* Adjusted margin */
              background: rgba(var(--primary-color-rgb),0.1);
              border: 1px dashed var(--text-muted);
-              cursor: default;
-             font-size: 0.9em;
+            cursor: default;
+            font-size: 0.9em;
              padding:0.25rem;
            
         }
@@ -271,6 +270,11 @@
            background: rgba(var(--primary-color-rgb),0.2);
             cursor: default;
         }
+         .team-container .draggable-player.active {
+           background: rgba(var(--secondary-color-rgb),0.3);
+            cursor: default;
+        }
+
         .draggable-player {
            padding: 0.5rem;
            margin: 0.25rem;
@@ -535,7 +539,7 @@
             </div>
         </div>
     </div>
-        <!-- Screen 3: Team Definition -->
+    <!-- Screen 3: Team Definition -->
     <div id="screenDefineTeams" class="screen">
         <div class="card">
             <div class="card-body p-4">
@@ -850,24 +854,45 @@ function renderPlayerAssignment() {
 
 }
     function assignPlayerToTeam(teamElement) {
-
     if (selectedPlayer) {
            const teamId = teamElement.dataset.teamId;
              const team=teams[teamId];
            
-        if (team.players.length < playersPerTeam){
-                 const playerDiv = document.createElement('div');
-                   playerDiv.className = 'draggable-player';
-                   playerDiv.textContent = selectedPlayer.textContent
+          const playerDiv = document.createElement('div');
+          playerDiv.className = 'draggable-player';
+          playerDiv.textContent = selectedPlayer.textContent
+        if (team.players.length < playersPerTeam && selectedPlayer.parentNode.id === "unassignedPlayers") {
             
-               
-                 teamElement.appendChild(playerDiv);
+            
+            teamElement.appendChild(playerDiv);
              team.players.push(selectedPlayer.textContent);
-             selectedPlayer.remove();
+              selectedPlayer.remove();
             selectedPlayer = null;
+
        }
+        else if (selectedPlayer.parentNode.id !== "unassignedPlayers"){
+                
+            const oldTeam=  teams.find(t => t.players.includes(selectedPlayer.textContent));
+
+                if (oldTeam){
+                  const index= oldTeam.players.findIndex( p=> p === selectedPlayer.textContent);
+                   if (index > -1) {
+                        oldTeam.players.splice(index, 1);
+                       
+                   }
+                    
+                      teamElement.appendChild(playerDiv)
+                   
+                     team.players.push(selectedPlayer.textContent);
+                  selectedPlayer.remove();
+                  selectedPlayer=null
+                     
+                }
+            
+        }
        
       validateTeamSizes();
+
     }
 }
  function selectPlayer(playerElement){
@@ -1257,8 +1282,7 @@ function submitMatch() {
   // Show scorers modal
   showScorersModal(scores[0], scores[1]);
 }
-
-function showScorersModal(homeGoals, awayGoals) {
+    function showScorersModal(homeGoals, awayGoals) {
   const modalHTML = `
     <div class="modal fade" id="scorersModal" tabindex="-1">
       <div class="modal-dialog modal-dialog-centered">
