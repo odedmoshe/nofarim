@@ -156,7 +156,7 @@
             pointer-events: auto;
         }
     </style>
-    <style>
+     <style>
         /* Buttons */
         .btn {
             border-radius: 0.75rem;
@@ -240,11 +240,11 @@
         }
 
         /* Team & Player Styles */
-        .team-container {
-            min-height: auto;
-            border: 2px dashed var(--primary-color);
-            padding: 0.5rem;
-            margin: 0.5rem 0;
+         .team-container {
+            min-height: auto; /* Adjusted min-height */
+             border: 2px dashed var(--primary-color);
+            padding: 0.5rem; /* Adjusted padding */
+            margin: 0.5rem 0; /* Adjusted margin */
             border-radius: var(--card-radius);
             background: rgba(var(--primary-color-rgb), 0.05);
             transition: all var(--transition-normal);
@@ -257,47 +257,63 @@
             border-style: solid;
             background: rgba(var(--primary-color-rgb), 0.1);
         }
-         .team-container .draggable-player {
-            margin: 0.25rem;
-            background: rgba(var(--primary-color-rgb),0.1);
-            border: 1px dashed var(--text-muted);
+        .team-container .draggable-player {
+             margin: 0.25rem; /* Adjusted margin */
+             background: rgba(var(--primary-color-rgb),0.1);
+             border: 1px dashed var(--text-muted);
             cursor: default;
              font-size: 0.9em;
-             padding:0.25rem;
-          }
-          .team-container .draggable-player:hover {
+              padding:0.25rem;
+           
+        }
+         .team-container .draggable-player:hover {
            background: rgba(var(--primary-color-rgb),0.2);
-           cursor: default;
+            cursor: default;
         }
-        
+        .team-container .draggable-player.active {
+           background: rgba(var(--secondary-color-rgb),0.3);
+            cursor: default;
+        }
         .draggable-player {
-            padding: 0.5rem;
-            margin: 0.25rem;
-            background: var(--surface-color);
-            border: 1px solid var(--text-muted);
-            border-radius: 0.75rem;
+           padding: 0.5rem;
+           margin: 0.25rem;
+           background: var(--surface-color);
+           border: 1px solid var(--text-muted);
+           border-radius: 0.75rem;
             transition: all var(--transition-fast);
-            user-select: none;
-             display: inline-block;
-             cursor: pointer;
+           user-select: none;
+            display: inline-block; /* Make it inline-block to control width */
+            cursor: pointer;
         }
-       .draggable-player:hover {
+        .draggable-player:hover {
            background: var(--primary-color);
            color: white;
            border-color: var(--primary-color);
            transform: translateX(-4px);
        }
-          .draggable-player.active {
-           background: var(--secondary-color);
-            color: white;
+       .draggable-player.active {
+          background: var(--secondary-color);
+           color: white;
            border-color: var(--secondary-color);
-        }
+         }
 
         .draggable-player:active {
             cursor: pointer;
         }
-        
-        /* Tables */
+
+        .sortable-ghost {
+            opacity: 0.4;
+            background: var(--primary-color) !important;
+            border: 2px dashed var(--primary-color);
+        }
+
+        .sortable-drag {
+            opacity: 0.8;
+            cursor: grabbing;
+            transform: scale(1.05);
+            box-shadow: var(--card-shadow);
+        }
+         /* Tables */
         .table-container {
             background: var(--surface-color);
             border-radius: var(--card-radius);
@@ -522,7 +538,7 @@
             </div>
         </div>
     </div>
-        <!-- Screen 3: Team Definition -->
+       <!-- Screen 3: Team Definition -->
     <div id="screenDefineTeams" class="screen">
         <div class="card">
             <div class="card-body p-4">
@@ -948,8 +964,7 @@ function renderTeamsTable() {
     </tr>
   `).join('');
 }
-
-function renderScorersTable() {
+    function renderScorersTable() {
     const tbody = document.getElementById('scorersTableBody');
     const scorersList = Object.entries(scorers)
         .sort(([, a], [, b]) => b - a)
@@ -963,7 +978,8 @@ function renderScorersTable() {
     </tr>
   `).join('');
 }
-    function renderMatchesTable() {
+
+function renderMatchesTable() {
   const tbody = document.getElementById('matchesTableBody');
   tbody.innerHTML = matches.map((match, index) => `
     <tr>
@@ -1262,8 +1278,7 @@ function continueAfterTie() {
     function sortTeams() {
         teams.sort((a, b) => b.points - a.points);
     }
-    
-      function renderSquadsMenu(){
+        function renderSquadsMenu(){
            const container = document.getElementById('squadsContainer');
           container.innerHTML = "";
            teams.forEach((team, idx) => {
@@ -1283,18 +1298,17 @@ function continueAfterTie() {
                  playerDiv.className = 'draggable-player';
                  playerDiv.textContent = player;
                  playerDiv.setAttribute('data-player', player)
-                   playerDiv.addEventListener('click', function() {
+                  playerDiv.addEventListener('click', function() {
                        clearActivePlayers();
                         selectPlayer(this)
                      });
                  teamElement.appendChild(playerDiv);
              })
-             teamElement.addEventListener('click', function() {
+               teamElement.addEventListener('click', function() {
                assignPlayerToTeam(this)
             });
           });
       }
-
 
 // Dark Mode Management
 function initializeDarkMode() {
