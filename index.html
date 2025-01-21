@@ -156,7 +156,7 @@
             pointer-events: auto;
         }
     </style>
-    <style>
+     <style>
         /* Buttons */
         .btn {
             border-radius: 0.75rem;
@@ -202,7 +202,6 @@
 
         .btn-success:hover {
             background: var(--secondary-dark);
-            
         }
 
         /* Timer Styles */
@@ -241,8 +240,8 @@
         }
 
         /* Team & Player Styles */
-        .team-container {
-            min-height: 120px;
+          .team-container {
+            min-height: 100px; /* Adjusted min-height */
             border: 2px dashed var(--primary-color);
             padding: 1rem;
             margin: 1rem 0;
@@ -293,8 +292,7 @@
             transform: scale(1.05);
             box-shadow: var(--card-shadow);
         }
-
-        /* Tables */
+         /* Tables */
         .table-container {
             background: var(--surface-color);
             border-radius: var(--card-radius);
@@ -325,7 +323,6 @@
         .table tbody tr:hover {
             background: rgba(var(--primary-color-rgb), 0.05);
         }
-
         /* Dark Mode Toggle */
         .dark-mode-toggle {
             position: fixed;
@@ -366,7 +363,6 @@
         .modal-footer {
             border-top-color: rgba(var(--primary-color-rgb), 0.2);
         }
-
         /* Animations */
         @keyframes pulse {
             0% { transform: scale(1); opacity: 1; }
@@ -549,8 +545,7 @@
                     <h2 class="mt-3">חלוקת שחקנים לקבוצות</h2>
                     <p class="text-muted">גרור את השחקנים לקבוצות המתאימות</p>
                 </div>
-                <div class="row">
-                    <div class="col-md-4">
+                 <div class="d-flex flex-column">
                         <div class="unassigned-container">
                             <h5>
                                 <i class="bi bi-person-lines-fill me-2"></i>
@@ -558,9 +553,11 @@
                             </h5>
                             <div id="unassignedPlayers" class="team-container"></div>
                         </div>
-                    </div>
-                    <div class="col-md-8" id="teamContainers"></div>
+                  
+                   <div id="teamContainers" class="d-flex flex-column"></div>
+                        
                 </div>
+               
                 <div class="text-center mt-4">
                     <button class="btn btn-primary btn-lg" id="finishAssignBtn" disabled>
                         <i class="bi bi-arrow-left me-2"></i>
@@ -634,7 +631,7 @@
                         <th>נגד</th>
                         <th>הפרש</th>
                         <th>נק'</th>
-                        <th>דירוג</th>
+                         <th>דירוג</th>
                     </tr>
                     </thead>
                     <tbody id="teamsTableBody"></tbody>
@@ -1197,7 +1194,6 @@ function renderScorersTable() {
   `).join('');
 }
 
-
 function renderMatchesTable() {
   const tbody = document.getElementById('matchesTableBody');
   tbody.innerHTML = matches.map((match, index) => `
@@ -1320,9 +1316,13 @@ function finishMatch(homeGoals, awayGoals) {
     renderMatchesTable();
     document.getElementById('resetTimerBtn').click();
      
-     showNextMatchSelection()
-     
-    });
+      if (homeGoals === awayGoals) {
+         showTieModal();
+      } else {
+         showNextMatchSelection()
+      }
+        
+  });
 }
 
 function showTieModal() {
@@ -1454,6 +1454,7 @@ function continueAfterTie() {
             });
         }
     }
+
 
   function updateTeamStats(team1Index, team2Index, team1Score, team2Score) {
     const team1 = teams[team1Index];
