@@ -156,7 +156,7 @@
             pointer-events: auto;
         }
     </style>
-       <style>
+     <style>
         /* Buttons */
         .btn {
             border-radius: 0.75rem;
@@ -240,9 +240,9 @@
         }
 
         /* Team & Player Styles */
-          .team-container {
+         .team-container {
             min-height: auto; /* Adjusted min-height */
-             border: 2px dashed var(--primary-color);
+            border: 2px dashed var(--primary-color);
             padding: 0.5rem; /* Adjusted padding */
             margin: 0.5rem 0; /* Adjusted margin */
             border-radius: var(--card-radius);
@@ -263,6 +263,8 @@
              background: rgba(var(--primary-color-rgb),0.1);
              border: 1px dashed var(--text-muted);
               cursor: default;
+             font-size: 0.9em;
+             padding:0.25rem;
            
         }
          .team-container .draggable-player:hover {
@@ -805,6 +807,7 @@ function getRandomColor() {
   }
   return color;
 }
+
 function clearActivePlayers(){
     if (selectedPlayer)
         selectedPlayer.classList.remove('active');
@@ -833,8 +836,8 @@ function renderPlayerAssignment() {
     // יצירת מיכלי קבוצות
     teams.forEach((team, idx) => {
         const teamDiv = document.createElement('div');
-        teamDiv.className = 'mb-3';
-        teamDiv.innerHTML = `<h5>${team.name}</h5>
+          teamDiv.className = 'mb-3';
+          teamDiv.innerHTML = `<h5>${team.name}</h5>
             <div id="team-${idx}" class="team-container" data-team-id="${idx}"></div>
              `;
 
@@ -985,8 +988,7 @@ function initializeEventListeners() {
     showEndTournamentModal();
   });
 }
-
-// Modal Functions
+    // Modal Functions
 function showErrorModal(title, message) {
   const modalHTML = `
     <div class="modal fade" id="errorModal" tabindex="-1">
@@ -1236,7 +1238,6 @@ function renderScorersTable() {
     </tr>
   `).join('');
 }
-
 
 function renderMatchesTable() {
   const tbody = document.getElementById('matchesTableBody');
