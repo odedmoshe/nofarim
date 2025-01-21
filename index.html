@@ -1236,6 +1236,7 @@ function showScorersModal(homeGoals, awayGoals) {
                         ${teams[activeTeams[0]].players.map(player => 
                           `<option value="${player}">${player}</option>`
                         ).join('')}
+                        <option value="own_goal">שער עצמי לחובת הקבוצה</option>
                       </select>
                     </div>
                   `).join('')}
@@ -1251,6 +1252,7 @@ function showScorersModal(homeGoals, awayGoals) {
                         ${teams[activeTeams[1]].players.map(player => 
                           `<option value="${player}">${player}</option>`
                         ).join('')}
+                        <option value="own_goal">שער עצמי לחובת הקבוצה</option>
                       </select>
                     </div>
                   `).join('')}
@@ -1275,14 +1277,32 @@ function showScorersModal(homeGoals, awayGoals) {
 }
 
 function finishMatch(homeGoals, awayGoals) {
-  // Update scorers
   const scorerSelects = document.querySelectorAll('.scorer-select');
   scorerSelects.forEach(select => {
     const player = select.value;
-    if (player) {
+    const teamId = parseInt(select.dataset.team);
+
+    if (player === "own_goal") {
+      // עדכון שער עצמי
+      const opponentTeamId = teamId === 0 ? 1 : 0;
+      teams[opponentTeamId].gf += 1;
+      teams[teamId].ga += 1;
+      teams[opponentTeamId].points += 3; // נקודות למתחרה
+    } else if (player) {
       scorers[player] = (scorers[player] || 0) + 1;
     }
   });
+
+  renderTeamsTable();
+  renderScorersTable();
+  renderMatchesTable();
+
+  const modal = bootstrap.Modal.getInstance(document.getElementById('scorersModal'));
+  modal.hide();
+  modal._element.addEventListener('hidden.bs.modal', () => {
+    modal._element.remove();
+  });
+}
 
   // Update match data
   let winner = null;
