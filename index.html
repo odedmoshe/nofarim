@@ -1079,7 +1079,145 @@ function startTournamentWithTeams() {
   showScreen('screenTournament');
   initializeMatchTimer();
 }
+// Add these functions after startTournamentWithTeams()
 
+function initializeMatchTimer() {
+  const timerDisplay = document.getElementById('matchTimer');
+  const startBtn = document.getElementById('startTimerBtn');
+  const pauseBtn = document.getElementById('pauseTimerBtn');
+  const resetBtn = document.getElementById('resetTimerBtn');
+
+  startBtn.addEventListener('click', () => {
+    isTimerRunning = true;
+    startBtn.disabled = true;
+    pauseBtn.disabled = false;
+    matchTimer = setInterval(updateTimer, 1000);
+  });
+
+  pauseBtn.addEventListener('click', () => {
+    isTimerRunning = false;
+    startBtn.disabled = false;
+    pauseBtn.disabled = true;
+    clearInterval(matchTimer);
+  });
+
+  resetBtn.addEventListener('click', () => {
+    isTimerRunning = false;
+    startBtn.disabled = false;
+    pauseBtn.disabled = true;
+    matchTimeSeconds = 0;
+    clearInterval(matchTimer);
+    updateTimerDisplay();
+  });
+
+  updateTimerDisplay();
+  renderCurrentMatch();
+  renderTeamsTable();
+  renderScorersTable();
+  renderMatchesTable();
+}
+
+function updateTimer() {
+  matchTimeSeconds++;
+  updateTimerDisplay();
+
+  // Check for warnings and match end
+  if (matchTimeSeconds === MATCH_DURATION - WARNING_TIME) {
+    alarmSound.play();
+    document.getElementById('matchTimer').classList.add('warning');
+  } else if (matchTimeSeconds === MATCH_DURATION) {
+    alarmSound.play();
+    document.getElementById('matchTimer').classList.add('extra-time');
+    isExtraTime = true;
+  } else if (isExtraTime && matchTimeSeconds === MATCH_DURATION + EXTRA_TIME) {
+    alarmSound.play();
+    document.getElementById('matchTimer').classList.add('end');
+    clearInterval(matchTimer);
+    isTimerRunning = false;
+  }
+}
+
+function updateTimerDisplay() {
+  const minutes = Math.floor(matchTimeSeconds / 60);
+  const seconds = matchTimeSeconds % 60;
+  document.getElementById('matchTimer').textContent = 
+    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+}
+
+function renderCurrentMatch() {
+  const title = document.getElementById('currentMatchTitle');
+  const teamsContainer = document.getElementById('currentMatchTeams');
+  
+  title.textContent = `משחק מספר ${matches.length + 1}`;
+  teamsContainer.innerHTML = `
+    <div class="col-md-6">
+      <div class="card p-3 text-center">
+        <h4>${teams[activeTeams[0]].name}</h4>
+        <input type="number" class="form-control form-control-lg mt-2" min="0" value="0">
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card p-3 text-center">
+        <h4>${teams[activeTeams[1]].name}</h4>
+        <input type="number" class="form-control form-control-lg mt-2" min="0" value="0">
+      </div>
+    </div>
+  `;
+}
+
+function renderTeamsTable() {
+  const tbody = document.getElementById('teamsTableBody');
+  tbody.innerHTML = teams.map((team, index) => `
+    <tr>
+      <td>${team.name}</td>
+      <td><span class="badge" style="background-color: ${team.color}">&nbsp;</span></td>
+      <td>${team.w}</td>
+      <td>${team.d}</td>
+      <td>${team.l}</td>
+      <td>${team.gf}</td>
+      <td>${team.ga}</td>
+      <td>${team.gd}</td>
+      <td>${team.points}</td>
+      <td>${index + 1}</td>
+    </tr>
+  `).join('');
+}
+
+function renderScorersTable() {
+  const tbody = document.getElementById('scorersTableBody');
+  const scorersList = Object.entries(scorers)
+    .sort(([,a], [,b]) => b - a)
+    .slice(0, 10);
+
+  tbody.innerHTML = scorersList.map(([player, goals]) => `
+    <tr>
+      <td>${player}</td>
+      <td>${getPlayerTeam(player)}</td>
+      <td>${goals}</td>
+    </tr>
+  `).join('');
+}
+
+function getPlayerTeam(playerName) {
+  for (let team of teams) {
+    if (team.players.includes(playerName)) {
+      return team.name;
+    }
+  }
+  return '';
+}
+
+function renderMatchesTable() {
+  const tbody = document.getElementById('matchesTableBody');
+  tbody.innerHTML = matches.map((match, index) => `
+    <tr>
+      <td>${index + 1}</td>
+      <td>${teams[match.teams[0]].name} vs ${teams[match.teams[1]].name}</td>
+      <td>${match.score[0]} - ${match.score[1]}</td>
+      <td>${match.winner ? teams[match.winner].name : 'תיקו'}</td>
+    </tr>
+  `).join('');
+}
 // Dark Mode Management
 const darkModeToggle = document.getElementById('darkModeToggle');
 
