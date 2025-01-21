@@ -520,7 +520,8 @@
         </div>
       </div>
     </div>
-        <!-- Screen 3: Team Definition -->
+
+    <!-- Screen 3: Team Definition -->
     <div id="screenDefineTeams" class="screen">
       <div class="card">
         <div class="card-body p-4">
@@ -1113,8 +1114,7 @@ function startTournamentWithTeams() {
   renderScorersTable();
   renderMatchesTable();
 }
-
-function updateTimer() {
+  function updateTimer() {
   matchTimeSeconds++;
   updateTimerDisplay();
 
@@ -1436,7 +1436,7 @@ function addDynamicStyles() {
 document.addEventListener('DOMContentLoaded', () => {
   addDynamicStyles();
   initializeDarkMode();
-  initializeEventListeners();
+    initializeEventListeners();
   showScreen('screenConfig');
 });
 </script>
