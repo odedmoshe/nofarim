@@ -156,7 +156,7 @@
             pointer-events: auto;
         }
     </style>
-     <style>
+    <style>
         /* Buttons */
         .btn {
             border-radius: 0.75rem;
@@ -240,15 +240,15 @@
         }
 
         /* Team & Player Styles */
-         .team-container {
-            min-height: auto; /* Adjusted min-height */
+        .team-container {
+          min-height: auto;
              border: 2px dashed var(--primary-color);
-            padding: 0.5rem; /* Adjusted padding */
-            margin: 0.5rem 0; /* Adjusted margin */
-            border-radius: var(--card-radius);
+             padding: 0.5rem;
+             margin: 0.5rem 0;
+             border-radius: var(--card-radius);
             background: rgba(var(--primary-color-rgb), 0.05);
             transition: all var(--transition-normal);
-              display: flex;
+             display: flex;
               flex-direction: column;
                min-height: 50px;
         }
@@ -258,15 +258,14 @@
             background: rgba(var(--primary-color-rgb), 0.1);
         }
         .team-container .draggable-player {
-             margin: 0.25rem; /* Adjusted margin */
-             background: rgba(var(--primary-color-rgb),0.1);
-             border: 1px dashed var(--text-muted);
-            cursor: default;
-             font-size: 0.9em;
-              padding:0.25rem;
-           
-        }
-         .team-container .draggable-player:hover {
+            margin: 0.25rem;
+            background: rgba(var(--primary-color-rgb),0.1);
+            border: 1px dashed var(--text-muted);
+           cursor: default;
+            font-size: 0.9em;
+            padding:0.25rem;
+          }
+           .team-container .draggable-player:hover {
            background: rgba(var(--primary-color-rgb),0.2);
             cursor: default;
         }
@@ -275,32 +274,31 @@
             cursor: default;
         }
         .draggable-player {
-           padding: 0.5rem;
-           margin: 0.25rem;
-           background: var(--surface-color);
-           border: 1px solid var(--text-muted);
-           border-radius: 0.75rem;
+            padding: 0.5rem;
+            margin: 0.25rem;
+            background: var(--surface-color);
+            border: 1px solid var(--text-muted);
+            border-radius: 0.75rem;
             transition: all var(--transition-fast);
-           user-select: none;
-            display: inline-block; /* Make it inline-block to control width */
+            user-select: none;
+            display: inline-block;
             cursor: pointer;
         }
-        .draggable-player:hover {
-           background: var(--primary-color);
-           color: white;
-           border-color: var(--primary-color);
-           transform: translateX(-4px);
-       }
-       .draggable-player.active {
-          background: var(--secondary-color);
-           color: white;
-           border-color: var(--secondary-color);
+       .draggable-player:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+            transform: translateX(-4px);
+        }
+          .draggable-player.active {
+            background: var(--secondary-color);
+            color: white;
+            border-color: var(--secondary-color);
          }
 
         .draggable-player:active {
             cursor: pointer;
         }
-
         .sortable-ghost {
             opacity: 0.4;
             background: var(--primary-color) !important;
@@ -567,7 +565,7 @@
                     <p class="text-muted">גרור את השחקנים לקבוצות המתאימות</p>
                 </div>
                 
-                <div class="d-flex" style="gap: 20px">
+                 <div class="d-flex" style="gap: 20px">
                         
                     <div  style="width: 40%;" >
                         
@@ -595,8 +593,7 @@
             </div>
         </div>
     </div>
-
-    <!-- Screen 5: Tournament Management -->
+     <!-- Screen 5: Tournament Management -->
     <div id="screenTournament" class="screen">
          <button class="btn btn-info mb-3" id="toggleSquadsBtn">
             <i class="bi bi-list-task me-2"></i>
@@ -729,276 +726,333 @@
         </div>
     </div>
 </div>
-// Modal Functions
-function showErrorModal(title, message) {
-  const modalHTML = `
-    <div class="modal fade" id="errorModal" tabindex="-1">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">${title}</h5>
-          </div>
-          <div class="modal-body text-center">
-            <div class="mb-3">
-              <i class="bi bi-exclamation-circle-fill text-danger" style="font-size: 3rem;"></i>
-            </div>
-            <p>${message}</p>
-          </div>
-          <div class="modal-footer justify-content-center">
-            <button class="btn btn-secondary" data-bs-dismiss="modal">סגור</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
+  <!-- Dark Mode Toggle -->
+  <button class="dark-mode-toggle" id="darkModeToggle" title="שינוי מצב תצוגה">
+    <i class="bi bi-moon-fill"></i>
+  </button>
+  <!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// Global Variables
+let numTeams = 3;
+let playersPerTeam = 6;
+let totalPlayers = numTeams * playersPerTeam;
+let playersPool = [];
+let teams = [];
+let activeTeams = [];
+let waitingTeams = [];
+let matches = [];
+let scorers = {};
+let selectedPlayer = null;
 
-  document.body.insertAdjacentHTML('beforeend', modalHTML);
-  const modal = new bootstrap.Modal(document.getElementById('errorModal'));
-  modal.show();
 
-  modal._element.addEventListener('hidden.bs.modal', () => {
-    modal._element.remove();
-  });
-}
+// Timer Variables
+let matchTimer = null;
+let matchTimeSeconds = 0;
+let isTimerRunning = false;
+let isExtraTime = false;
+const MATCH_DURATION = 8 * 60; // 8 דקות בשניות
+const EXTRA_TIME = 60; // דקה נוספת בשניות
+const WARNING_TIME = 60; // התראה דקה לפני הסיום
 
-function showFirstMatchSelection() {
-  const modalHTML = `
-    <div class="modal fade" id="selectFirstMatchModal" tabindex="-1">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">בחירת משחק ראשון</h5>
-          </div>
-          <div class="modal-body">
-            <div class="mb-3">
-              <label class="form-label">קבוצה ראשונה</label>
-              <select class="form-select form-select-lg" id="firstTeamSelect">
-                ${teams.map((t, i) => `<option value="${i}">${t.name}</option>`).join('')}
-              </select>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">קבוצה שניה</label>
-              <select class="form-select form-select-lg" id="secondTeamSelect">
-                ${teams.map((t, i) => `<option value="${i}">${t.name}</option>`).join('')}
-              </select>
-            </div>
-          </div>
-          <div class="modal-footer justify-content-center">
-            <button class="btn btn-primary btn-lg" onclick="startTournamentWithTeams()">
-              <i class="bi bi-play-fill me-2"></i>
-              התחל טורניר
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
+// צליל התראה
+const alarmSound = new Audio('data:audio/wav;base64,//uQRAAAAWMSLwUIYAAsYkXgoQwAEaYLWfkWgAI0wWs/ItAAAGDgYtAgAyN+QWaAAihwMWm4G8QQRDiMcCBcH3Cc+CDv/7xA4Tvh9Rz/y8QADBwMWgQAZG/ILNAARQ4GLTcDeIIIhxGOBAuD7hOfBB3/94gcJ3w+o5/5eIAIAAAVwWgQAVQ2ORaIQwEMAJiDg95G4nQL7mQVWI6GwRcfsZAcsKkJvxgxEjzFUgfHoSQ9Qq7KNwqHwuB13MA4a1q/DmBrHgPcmjiGoh//EwC5nGPEmS4RcfkVKOhJf+WOgoxJclFz3kgn//dBA+ya1GhurNn8zb//9NNutNuhz31f////9vt///z+IdAEAAAK4LQIAKobHItEIYCGAExBwe8jcToF9zIKrEdDYIuP2MgOWFSE34wYiR5iqQPj0JIeoVdlG4VD4XA67mAcNa1fhzA1jwHuTRxDUQ//iYBczjHiTJcIuPyKlHQkv/LHQUYkuSi57yQT//uggfZNajQ3Vmz+Zt//+mm3Wm3Q576v////+32///5/EOgAAADVghQAAAAA==');
 
-  document.body.insertAdjacentHTML('beforeend', modalHTML);
-  const modal = new bootstrap.Modal(document.getElementById('selectFirstMatchModal'));
-  modal.show();
-}
-
-function showEndTournamentModal() {
-  const modalHTML = `
-    <div class="modal fade" id="endTournamentModal" tabindex="-1">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">סיום הטורניר</h5>
-          </div>
-          <div class="modal-body text-center">
-            <div class="mb-3">
-              <i class="bi bi-exclamation-triangle-fill text-warning" style="font-size: 3rem;"></i>
-            </div>
-            <h4>האם אתה בטוח?</h4>
-            <p>סיום הטורניר ימחק את כל הנתונים הקיימים</p>
-          </div>
-          <div class="modal-footer justify-content-center">
-            <button class="btn btn-danger" onclick="location.reload()">
-              <i class="bi bi-x-circle-fill me-2"></i>
-              סיים טורניר
-            </button>
-            <button class="btn btn-secondary" data-bs-dismiss="modal">
-              <i class="bi bi-arrow-return-left me-2"></i>
-              חזור לטורניר
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
-
-  document.body.insertAdjacentHTML('beforeend', modalHTML);
-  const modal = new bootstrap.Modal(document.getElementById('endTournamentModal'));
-  modal.show();
-}
-
-// Match Management Functions
-function startTournamentWithTeams() {
-  const firstTeam = parseInt(document.getElementById('firstTeamSelect').value);
-  const secondTeam = parseInt(document.getElementById('secondTeamSelect').value);
-  
-  if (firstTeam === secondTeam) {
-    showErrorModal('שגיאה', 'יש לבחור שתי קבוצות שונות');
-    return;
+// Basic Functions
+function validateForm(form) {
+  if (!form) {
+    console.error('No form provided');
+    return false;
   }
 
-  const modal = bootstrap.Modal.getInstance(document.getElementById('selectFirstMatchModal'));
-  if (modal) {
-    modal.hide();
-    modal._element.addEventListener('hidden.bs.modal', () => {
-      modal._element.remove();
+  if (!form.checkValidity()) {
+    form.classList.add('was-validated');
+    return false;
+  }
+  return true;
+}
+
+// Screen Management
+function showScreen(screenId) {
+  console.log(`Switching to screen: ${screenId}`);
+  
+  document.querySelectorAll('.screen').forEach(screen => {
+    screen.classList.remove('active');
+    screen.style.display = 'none';
+  });
+  
+  const targetScreen = document.getElementById(screenId);
+  if (targetScreen) {
+    targetScreen.style.display = 'block';
+    requestAnimationFrame(() => {
+      targetScreen.classList.add('active');
+      targetScreen.style.opacity = '1';
+      targetScreen.style.pointerEvents = 'auto';
       
-      activeTeams = [firstTeam, secondTeam];
-      waitingTeams = teams.map((_, i) => i).filter(i => !activeTeams.includes(i));
-      
-      showScreen('screenTournament');
-      initializeMatchTimer();
+      if (screenId === 'screenTournament') {
+        setTimeout(() => {
+          renderCurrentMatch();
+          renderTeamsTable();
+          renderScorersTable();
+          renderMatchesTable();
+        }, 0);
+      }
     });
   }
 }
-  function initializeMatchTimer() {
-  const startBtn = document.getElementById('startTimerBtn');
-  const pauseBtn = document.getElementById('pauseTimerBtn');
-  const resetBtn = document.getElementById('resetTimerBtn');
-  const submitBtn = document.getElementById('submitMatchBtn');
 
-  startBtn.addEventListener('click', () => {
-    isTimerRunning = true;
-    startBtn.disabled = true;
-    pauseBtn.disabled = false;
-    matchTimer = setInterval(updateTimer, 1000);
-  });
-
-  pauseBtn.addEventListener('click', () => {
-    isTimerRunning = false;
-    startBtn.disabled = false;
-    pauseBtn.disabled = true;
-    clearInterval(matchTimer);
-    document.getElementById('matchTimer').classList.remove('warning', 'extra-time', 'end');
-    updateTimerDisplay();
-  });
-
-  resetBtn.addEventListener('click', () => {
-    isTimerRunning = false;
-    startBtn.disabled = false;
-    pauseBtn.disabled = true;
-    matchTimeSeconds = 0;
-    clearInterval(matchTimer);
-    document.getElementById('matchTimer').classList.remove('warning', 'extra-time', 'end');
-    updateTimerDisplay();
-  });
-
-  submitBtn.addEventListener('click', submitMatch);
-  
-  renderCurrentMatch();
-  renderTeamsTable();
-  renderScorersTable();
-  renderMatchesTable();
-}
-
-function updateTimer() {
-  matchTimeSeconds++;
-  updateTimerDisplay();
-
-  const timerDisplay = document.getElementById('matchTimer');
-  if (matchTimeSeconds === MATCH_DURATION - WARNING_TIME) {
-    alarmSound.play();
-    timerDisplay.classList.add('warning');
-  } else if (matchTimeSeconds === MATCH_DURATION) {
-    alarmSound.play();
-    timerDisplay.classList.add('extra-time');
-    isExtraTime = true;
-  } else if (isExtraTime && matchTimeSeconds === MATCH_DURATION + EXTRA_TIME) {
-    alarmSound.play();
-    timerDisplay.classList.add('end');
-    clearInterval(matchTimer);
-    isTimerRunning = false;
+// Teams Management
+function setupTeamsArray() {
+  teams = [];
+  for (let i = 0; i < numTeams; i++) {
+    teams.push({
+      name: `קבוצה ${i+1}`,
+      color: getRandomColor(),
+      players: [],
+      w: 0, d: 0, l: 0,
+      gf: 0, ga: 0, gd: 0,
+      points: 0
+    });
   }
 }
 
-function updateTimerDisplay() {
-  const minutes = Math.floor(matchTimeSeconds / 60);
-  const seconds = matchTimeSeconds % 60;
-  document.getElementById('matchTimer').textContent = 
-    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+function getRandomColor() {
+  const letters = '0123456789ABCDEF';
+  let color = '#';
+  for (let i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)];
+  }
+  return color;
 }
 
-function renderCurrentMatch() {
-  const title = document.getElementById('currentMatchTitle');
-  const teamsContainer = document.getElementById('currentMatchTeams');
+function clearActivePlayers(){
+    if (selectedPlayer)
+        selectedPlayer.classList.remove('active');
+}
+function renderPlayerAssignment() {
+    const unassignedContainer = document.getElementById('unassignedPlayers');
+    const teamContainers = document.getElementById('teamContainers');
+    selectedPlayer = null
+    // ניקוי מיכלים
+    unassignedContainer.innerHTML = '';
+    teamContainers.innerHTML = '';
+
+    // הוספת שחקנים לא משובצים
+    playersPool.forEach(player => {
+        const playerDiv = document.createElement('div');
+        playerDiv.className = 'draggable-player';
+        playerDiv.textContent = player;
+        playerDiv.setAttribute('data-player',player)
+        playerDiv.addEventListener('click', function() {
+           clearActivePlayers();
+            selectPlayer(this)
+        });
+        unassignedContainer.appendChild(playerDiv);
+    });
+
+    // יצירת מיכלי קבוצות
+    teams.forEach((team, idx) => {
+        const teamDiv = document.createElement('div');
+          teamDiv.className = 'mb-3';
+          teamDiv.innerHTML = `<h5>${team.name}</h5>
+            <div id="team-${idx}" class="team-container" data-team-id="${idx}"></div>
+             `;
+
+        teamContainers.appendChild(teamDiv);
+        const teamElement = document.getElementById(`team-${idx}`);
+         teamElement.addEventListener('click', function() {
+           assignPlayerToTeam(this)
+       });
+    });
+    
+      new Sortable(unassignedContainer, {
+        group: 'shared',
+        animation: 150,
+        ghostClass: 'sortable-ghost',
+        dragClass: 'sortable-drag',
+        onEnd: (evt) => {
+             validateTeamSizes();
+        }
+      });
+
+
+}
+    function assignPlayerToTeam(teamElement) {
+
+    if (selectedPlayer) {
+           const teamId = teamElement.dataset.teamId;
+             const team=teams[teamId];
+          const playerDiv = document.createElement('div');
+          playerDiv.className = 'draggable-player';
+          playerDiv.textContent = selectedPlayer.textContent
+         if (selectedPlayer.parentNode.id === "unassignedPlayers" && team.players.length < playersPerTeam) {
+           
+            
+            teamElement.appendChild(playerDiv);
+             team.players.push(selectedPlayer.textContent);
+             selectedPlayer.remove();
+            selectedPlayer = null;
+
+       }
+        else if (selectedPlayer.parentNode.id !== "unassignedPlayers"){
+           const oldTeam=  teams.find(t => t.players.includes(selectedPlayer.textContent));
+                if (oldTeam){
+                  const index= oldTeam.players.findIndex( p=> p === selectedPlayer.textContent);
+                   if (index > -1) {
+                        oldTeam.players.splice(index, 1);
+                       
+                   }
+                      teamElement.appendChild(playerDiv)
+                     team.players.push(selectedPlayer.textContent);
+                  selectedPlayer.remove();
+                  selectedPlayer=null
+                     
+                }
+            
+        } else if (selectedPlayer.parentNode.id === `team-squad-${teamId}`){
+               const index= team.players.findIndex( p=> p === selectedPlayer.textContent);
+                if (index > -1) {
+                     team.players.splice(index, 1);
+                     
+                }
+                
+                 const unassignedContainer = document.getElementById('unassignedPlayers');
+                unassignedContainer.appendChild(playerDiv)
+                selectedPlayer = null;
+        }
+        
+      validateTeamSizes();
+    }
+}
+ function selectPlayer(playerElement){
+     if (selectedPlayer)
+        selectedPlayer.classList.remove('active');
+    selectedPlayer = playerElement
+   selectedPlayer.classList.add('active');
+ }
+function validateTeamSizes() {
+    let isValid = true;
+    
+    teams.forEach((team, idx) => {
+      const container = document.getElementById(`team-${idx}`);
+      const players = container.querySelectorAll('.draggable-player');
+      team.players = Array.from(players).map(p => p.textContent);
+      
+      if (players.length !== playersPerTeam) {
+        isValid = false;
+      }
+    });
+    
+    document.getElementById('finishAssignBtn').disabled = !isValid;
+    return isValid;
+}
+
+
+function renderTeamsDefinition() {
+  const container = document.getElementById('teamsDefinition');
+  container.innerHTML = '';
   
-  title.textContent = `משחק מספר ${matches.length + 1}`;
-  teamsContainer.innerHTML = `
-    <div class="col-md-6">
-      <div class="card p-3 text-center">
-        <h4>${teams[activeTeams[0]].name}</h4>
-        <input type="number" class="form-control form-control-lg mt-2" min="0" value="0">
+  teams.forEach((team, idx) => {
+    const teamDiv = document.createElement('div');
+    teamDiv.className = 'mb-3 p-3 border rounded';
+    teamDiv.innerHTML = `
+      <div class="mb-2">
+        <label class="form-label">שם קבוצה ${idx + 1}:</label>
+        <input type="text" class="form-control" value="${team.name}">
       </div>
-    </div>
-    <div class="col-md-6">
-      <div class="card p-3 text-center">
-        <h4>${teams[activeTeams[1]].name}</h4>
-        <input type="number" class="form-control form-control-lg mt-2" min="0" value="0">
+      <div>
+        <label class="form-label">צבע קבוצה:</label>
+        <input type="color" class="form-control" value="${team.color}">
       </div>
-    </div>
-  `;
-}
+    `;
 
-function renderTeamsTable() {
-    const tbody = document.getElementById('teamsTableBody');
-    sortTeams();
-    tbody.innerHTML = teams.map((team, index) => `
-    <tr>
-      <td>${team.name}</td>
-      <td><span class="badge" style="background-color: ${team.color}"> </span></td>
-      <td>${team.w}</td>
-      <td>${team.d}</td>
-      <td>${team.l}</td>
-      <td>${team.gf}</td>
-      <td>${team.ga}</td>
-      <td>${team.gd}</td>
-      <td>${team.points}</td>
-      <td>${index + 1}</td>
-    </tr>
-  `).join('');
-}
-    function renderScorersTable() {
-    const tbody = document.getElementById('scorersTableBody');
-    const scorersList = Object.entries(scorers)
-        .sort(([, a], [, b]) => b - a)
-        .slice(0, 10);
+    const nameInput = teamDiv.querySelector('input[type="text"]');
+    const colorInput = teamDiv.querySelector('input[type="color"]');
 
-    tbody.innerHTML = scorersList.map(([player, goals]) => `
-    <tr>
-      <td>${player}</td>
-       <td>${getPlayerTeam(player)}</td>
-      <td>${goals}</td>
-    </tr>
-  `).join('');
-}
+    nameInput.addEventListener('change', () => {
+      teams[idx].name = nameInput.value || `קבוצה ${idx + 1}`;
+    });
 
-function renderMatchesTable() {
-  const tbody = document.getElementById('matchesTableBody');
-  tbody.innerHTML = matches.map((match, index) => `
-    <tr>
-      <td>${index + 1}</td>
-      <td>${teams[match.teams[0]].name} vs ${teams[match.teams[1]].name}</td>
-      <td>${match.score[0]} - ${match.score[1]}</td>
-      <td>${match.winner !== null ? teams[match.winner].name : 'תיקו'}</td>
-    </tr>
-  `).join('');
-}
+    colorInput.addEventListener('change', () => {
+      teams[idx].color = colorInput.value;
+    });
 
-function submitMatch() {
-  const scores = Array.from(document.querySelectorAll('#currentMatchTeams input')).map(input => parseInt(input.value) || 0);
-  
-  // Show scorers modal
-  showScorersModal(scores[0], scores[1]);
+    container.appendChild(teamDiv);
+  });
 }
+  // Event Listeners
+function initializeEventListeners() {
+  // Config Form
+  document.getElementById('configForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (validateForm(e.target)) {
+      numTeams = parseInt(document.getElementById('numTeamsInput').value);
+      playersPerTeam = parseInt(document.getElementById('playersPerTeamInput').value);
+      totalPlayers = numTeams * playersPerTeam;
+      document.getElementById('totalPlayersSpan').textContent = totalPlayers;
+      showScreen('screenPlayers');
+    }
+  });
 
-function showScorersModal(homeGoals, awayGoals) {
+  // Players Form
+  const playersForm = document.getElementById('playersForm');
+  const playersInput = document.getElementById('playersInput');
+  const submitButton = playersForm.querySelector('button[type="submit"]');
+
+  playersForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    if (validateForm(e.target)) {
+      const rawText = playersInput.value.trim();
+      const names = rawText.split(/[\n,]+/)
+        .map(name => name.trim())
+        .filter(name => name && name.length > 0);
+
+      if (names.length === totalPlayers) {
+        playersPool = names;
+        setupTeamsArray();
+        renderTeamsDefinition();
+        showScreen('screenDefineTeams');
+      } else {
+        showErrorModal('שגיאה', `נא להזין בדיוק ${totalPlayers} שמות! (הוזנו ${names.length} שמות)`);
+      }
+    }
+  });
+
+  // Teams Definition Done Button
+  const teamsDefinitionDoneBtn = document.getElementById('teamsDefinitionDoneBtn');
+  if (teamsDefinitionDoneBtn) {
+    teamsDefinitionDoneBtn.addEventListener('click', () => {
+      console.log('Teams Definition Done Button Clicked');
+      renderPlayerAssignment();
+      showScreen('screenAssign');
+    });
+  } else {
+    console.error('teamsDefinitionDoneBtn not found');
+  }
+
+  // Finish Assignment Button
+  document.getElementById('finishAssignBtn').addEventListener('click', () => {
+    if (validateTeamSizes()) {
+      showFirstMatchSelection();
+    }
+  });
+
+  // End Tournament Button
+  document.getElementById('endTournamentBtn').addEventListener('click', () => {
+    showEndTournamentModal();
+  });
+   // Toggle squads menu
+  document.getElementById('toggleSquadsBtn').addEventListener('click', () => {
+     const squadsMenu = document.getElementById('squadsMenu');
+      if(squadsMenu.style.display === 'none'){
+          squadsMenu.style.display = 'block';
+          renderSquadsMenu();
+      }else {
+          squadsMenu.style.display = 'none';
+      }
+    });
+}
+    function showScorersModal(homeGoals, awayGoals) {
   const modalHTML = `
     <div class="modal fade" id="scorersModal" tabindex="-1">
       <div class="modal-dialog modal-dialog-centered">
