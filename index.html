@@ -156,7 +156,7 @@
             pointer-events: auto;
         }
     </style>
-      <style>
+    <style>
         /* Buttons */
         .btn {
             border-radius: 0.75rem;
@@ -239,54 +239,49 @@
             animation: endGame 0.5s infinite alternate;
         }
 
-         /* Team & Player Styles */
+        /* Team & Player Styles */
         .team-container {
-          min-height: auto; /* Adjusted min-height */
-           border: 2px dashed var(--primary-color);
-           padding: 0.5rem; /* Adjusted padding */
-           margin: 0.5rem 0; /* Adjusted margin */
-           border-radius: var(--card-radius);
-           background: rgba(var(--primary-color-rgb), 0.05);
-           transition: all var(--transition-normal);
-            display: flex;
-            flex-direction: column;
-            
+            min-height: auto;
+            border: 2px dashed var(--primary-color);
+            padding: 0.5rem;
+            margin: 0.5rem 0;
+            border-radius: var(--card-radius);
+            background: rgba(var(--primary-color-rgb), 0.05);
+            transition: all var(--transition-normal);
+              display: flex;
+              flex-direction: column;
+               min-height: 50px;
         }
 
         .team-container:hover {
             border-style: solid;
             background: rgba(var(--primary-color-rgb), 0.1);
         }
-        .team-container .draggable-player {
-             margin: 0.25rem; /* Adjusted margin */
-             background: rgba(var(--primary-color-rgb),0.1);
-             border: 1px dashed var(--text-muted);
+         .team-container .draggable-player {
+            margin: 0.25rem;
+            background: rgba(var(--primary-color-rgb),0.1);
+            border: 1px dashed var(--text-muted);
             cursor: default;
-            font-size: 0.9em;
+             font-size: 0.9em;
              padding:0.25rem;
-           
-        }
-         .team-container .draggable-player:hover {
+          }
+          .team-container .draggable-player:hover {
            background: rgba(var(--primary-color-rgb),0.2);
-            cursor: default;
+           cursor: default;
         }
-         .team-container .draggable-player.active {
-           background: rgba(var(--secondary-color-rgb),0.3);
-            cursor: default;
-        }
-
+        
         .draggable-player {
-           padding: 0.5rem;
-           margin: 0.25rem;
-           background: var(--surface-color);
-           border: 1px solid var(--text-muted);
-           border-radius: 0.75rem;
+            padding: 0.5rem;
+            margin: 0.25rem;
+            background: var(--surface-color);
+            border: 1px solid var(--text-muted);
+            border-radius: 0.75rem;
             transition: all var(--transition-fast);
-           user-select: none;
-            display: inline-block; /* Make it inline-block to control width */
-            cursor: pointer;
+            user-select: none;
+             display: inline-block;
+             cursor: pointer;
         }
-        .draggable-player:hover {
+       .draggable-player:hover {
            background: var(--primary-color);
            color: white;
            border-color: var(--primary-color);
@@ -301,20 +296,8 @@
         .draggable-player:active {
             cursor: pointer;
         }
-
-        .sortable-ghost {
-            opacity: 0.4;
-            background: var(--primary-color) !important;
-            border: 2px dashed var(--primary-color);
-        }
-
-        .sortable-drag {
-            opacity: 0.8;
-            cursor: grabbing;
-            transform: scale(1.05);
-            box-shadow: var(--card-shadow);
-        }
-         /* Tables */
+        
+        /* Tables */
         .table-container {
             background: var(--surface-color);
             border-radius: var(--card-radius);
@@ -539,7 +522,7 @@
             </div>
         </div>
     </div>
-    <!-- Screen 3: Team Definition -->
+        <!-- Screen 3: Team Definition -->
     <div id="screenDefineTeams" class="screen">
         <div class="card">
             <div class="card-body p-4">
@@ -565,10 +548,10 @@
                 <div class="text-center mb-4">
                     <i class="bi bi-diagram-3-fill text-primary" style="font-size: 3rem;"></i>
                     <h2 class="mt-3">חלוקת שחקנים לקבוצות</h2>
-                    <p class="text-muted">בחר שחקן ואז קבוצה כדי לשייך אותו</p>
+                    <p class="text-muted">גרור את השחקנים לקבוצות המתאימות</p>
                 </div>
                 
-                 <div class="d-flex">
+                <div class="d-flex" style="gap: 20px">
                         
                     <div  style="width: 40%;" >
                         
@@ -576,8 +559,9 @@
                             <i class="bi bi-person-lines-fill me-2"></i>
                             שחקנים לא משובצים
                         </h5>
-                         <div id="unassignedPlayers" class="team-container">
-                         </div>
+                        <div id="unassignedPlayers" class="team-container" style="min-height: 100px">
+                        </div>
+                        
                     </div>
                   
                    <div id="teamContainers" style="width: 60%;">
@@ -598,6 +582,22 @@
 
     <!-- Screen 5: Tournament Management -->
     <div id="screenTournament" class="screen">
+         <button class="btn btn-info mb-3" id="toggleSquadsBtn">
+            <i class="bi bi-list-task me-2"></i>
+            ניהול סגלים
+        </button>
+         <div id="squadsMenu" style="display: none;">
+           <div class="card mb-3">
+                <div class="card-body">
+                   <h5>ניהול סגלי הקבוצות</h5>
+                    <p class="text-muted mb-2">
+                      בחר קבוצה כדי לראות את השחקנים ולבצע שינויים
+                    </p>
+                 <div id="squadsContainer" class="d-flex flex-column gap-2">
+                 </div>
+                </div>
+           </div>
+           </div>
         <div class="card mb-4">
             <div class="card-body p-4">
                 <div class="text-center mb-4">
@@ -659,7 +659,7 @@
                         <th>נגד</th>
                         <th>הפרש</th>
                         <th>נק'</th>
-                        <th>דירוג</th>
+                         <th>דירוג</th>
                     </tr>
                     </thead>
                     <tbody id="teamsTableBody"></tbody>
@@ -713,307 +713,7 @@
         </div>
     </div>
 </div>
-  <!-- Dark Mode Toggle -->
-  <button class="dark-mode-toggle" id="darkModeToggle" title="שינוי מצב תצוגה">
-    <i class="bi bi-moon-fill"></i>
-  </button>
-  <!-- Scripts -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-// Global Variables
-let numTeams = 3;
-let playersPerTeam = 6;
-let totalPlayers = numTeams * playersPerTeam;
-let playersPool = [];
-let teams = [];
-let activeTeams = [];
-let waitingTeams = [];
-let matches = [];
-let scorers = {};
-let selectedPlayer = null;
-
-
-// Timer Variables
-let matchTimer = null;
-let matchTimeSeconds = 0;
-let isTimerRunning = false;
-let isExtraTime = false;
-const MATCH_DURATION = 8 * 60; // 8 דקות בשניות
-const EXTRA_TIME = 60; // דקה נוספת בשניות
-const WARNING_TIME = 60; // התראה דקה לפני הסיום
-
-// צליל התראה
-const alarmSound = new Audio('data:audio/wav;base64,//uQRAAAAWMSLwUIYAAsYkXgoQwAEaYLWfkWgAI0wWs/ItAAAGDgYtAgAyN+QWaAAihwMWm4G8QQRDiMcCBcH3Cc+CDv/7xA4Tvh9Rz/y8QADBwMWgQAZG/ILNAARQ4GLTcDeIIIhxGOBAuD7hOfBB3/94gcJ3w+o5/5eIAIAAAVwWgQAVQ2ORaIQwEMAJiDg95G4nQL7mQVWI6GwRcfsZAcsKkJvxgxEjzFUgfHoSQ9Qq7KNwqHwuB13MA4a1q/DmBrHgPcmjiGoh//EwC5nGPEmS4RcfkVKOhJf+WOgoxJclFz3kgn//dBA+ya1GhurNn8zb//9NNutNuhz31f////9vt///z+IdAEAAAK4LQIAKobHItEIYCGAExBwe8jcToF9zIKrEdDYIuP2MgOWFSE34wYiR5iqQPj0JIeoVdlG4VD4XA67mAcNa1fhzA1jwHuTRxDUQ//iYBczjHiTJcIuPyKlHQkv/LHQUYkuSi57yQT//uggfZNajQ3Vmz+Zt//+mm3Wm3Q576v////+32///5/EOgAAADVghQAAAAA==');
-
-// Basic Functions
-function validateForm(form) {
-  if (!form) {
-    console.error('No form provided');
-    return false;
-  }
-
-  if (!form.checkValidity()) {
-    form.classList.add('was-validated');
-    return false;
-  }
-  return true;
-}
-
-// Screen Management
-function showScreen(screenId) {
-  console.log(`Switching to screen: ${screenId}`);
-  
-  document.querySelectorAll('.screen').forEach(screen => {
-    screen.classList.remove('active');
-    screen.style.display = 'none';
-  });
-  
-  const targetScreen = document.getElementById(screenId);
-  if (targetScreen) {
-    targetScreen.style.display = 'block';
-    requestAnimationFrame(() => {
-      targetScreen.classList.add('active');
-      targetScreen.style.opacity = '1';
-      targetScreen.style.pointerEvents = 'auto';
-      
-      if (screenId === 'screenTournament') {
-        setTimeout(() => {
-          renderCurrentMatch();
-          renderTeamsTable();
-          renderScorersTable();
-          renderMatchesTable();
-        }, 0);
-      }
-    });
-  }
-}
-
-// Teams Management
-function setupTeamsArray() {
-  teams = [];
-  for (let i = 0; i < numTeams; i++) {
-    teams.push({
-      name: `קבוצה ${i+1}`,
-      color: getRandomColor(),
-      players: [],
-      w: 0, d: 0, l: 0,
-      gf: 0, ga: 0, gd: 0,
-      points: 0
-    });
-  }
-}
-
-function getRandomColor() {
-  const letters = '0123456789ABCDEF';
-  let color = '#';
-  for (let i = 0; i < 6; i++) {
-    color += letters[Math.floor(Math.random() * 16)];
-  }
-  return color;
-}
-
-function clearActivePlayers(){
-    if (selectedPlayer)
-        selectedPlayer.classList.remove('active');
-}
-function renderPlayerAssignment() {
-    const unassignedContainer = document.getElementById('unassignedPlayers');
-    const teamContainers = document.getElementById('teamContainers');
-    selectedPlayer = null
-    // ניקוי מיכלים
-    unassignedContainer.innerHTML = '';
-    teamContainers.innerHTML = '';
-
-    // הוספת שחקנים לא משובצים
-    playersPool.forEach(player => {
-        const playerDiv = document.createElement('div');
-        playerDiv.className = 'draggable-player';
-        playerDiv.textContent = player;
-        playerDiv.setAttribute('data-player',player)
-        playerDiv.addEventListener('click', function() {
-           clearActivePlayers();
-            selectPlayer(this)
-        });
-        unassignedContainer.appendChild(playerDiv);
-    });
-
-    // יצירת מיכלי קבוצות
-    teams.forEach((team, idx) => {
-        const teamDiv = document.createElement('div');
-          teamDiv.className = 'mb-3';
-          teamDiv.innerHTML = `<h5>${team.name}</h5>
-            <div id="team-${idx}" class="team-container" data-team-id="${idx}"></div>
-             `;
-
-        teamContainers.appendChild(teamDiv);
-        const teamElement = document.getElementById(`team-${idx}`);
-        teamElement.addEventListener('click', function() {
-           assignPlayerToTeam(this)
-       });
-    });
-
-}
-    function assignPlayerToTeam(teamElement) {
-    if (selectedPlayer) {
-           const teamId = teamElement.dataset.teamId;
-             const team=teams[teamId];
-           
-          const playerDiv = document.createElement('div');
-          playerDiv.className = 'draggable-player';
-          playerDiv.textContent = selectedPlayer.textContent
-        if (team.players.length < playersPerTeam && selectedPlayer.parentNode.id === "unassignedPlayers") {
-            
-            
-            teamElement.appendChild(playerDiv);
-             team.players.push(selectedPlayer.textContent);
-              selectedPlayer.remove();
-            selectedPlayer = null;
-
-       }
-        else if (selectedPlayer.parentNode.id !== "unassignedPlayers"){
-                
-            const oldTeam=  teams.find(t => t.players.includes(selectedPlayer.textContent));
-
-                if (oldTeam){
-                  const index= oldTeam.players.findIndex( p=> p === selectedPlayer.textContent);
-                   if (index > -1) {
-                        oldTeam.players.splice(index, 1);
-                       
-                   }
-                    
-                      teamElement.appendChild(playerDiv)
-                   
-                     team.players.push(selectedPlayer.textContent);
-                  selectedPlayer.remove();
-                  selectedPlayer=null
-                     
-                }
-            
-        }
-       
-      validateTeamSizes();
-
-    }
-}
- function selectPlayer(playerElement){
-     if (selectedPlayer)
-        selectedPlayer.classList.remove('active');
-    selectedPlayer = playerElement
-   selectedPlayer.classList.add('active');
- }
-function validateTeamSizes() {
-    let isValid = true;
-    
-    teams.forEach((team, idx) => {
-      const container = document.getElementById(`team-${idx}`);
-      const players = container.querySelectorAll('.draggable-player');
-      team.players = Array.from(players).map(p => p.textContent);
-      
-      if (players.length !== playersPerTeam) {
-        isValid = false;
-      }
-    });
-    
-    document.getElementById('finishAssignBtn').disabled = !isValid;
-    return isValid;
-}
-
-
-function renderTeamsDefinition() {
-  const container = document.getElementById('teamsDefinition');
-  container.innerHTML = '';
-  
-  teams.forEach((team, idx) => {
-    const teamDiv = document.createElement('div');
-    teamDiv.className = 'mb-3 p-3 border rounded';
-    teamDiv.innerHTML = `
-      <div class="mb-2">
-        <label class="form-label">שם קבוצה ${idx + 1}:</label>
-        <input type="text" class="form-control" value="${team.name}">
-      </div>
-      <div>
-        <label class="form-label">צבע קבוצה:</label>
-        <input type="color" class="form-control" value="${team.color}">
-      </div>
-    `;
-
-    const nameInput = teamDiv.querySelector('input[type="text"]');
-    const colorInput = teamDiv.querySelector('input[type="color"]');
-
-    nameInput.addEventListener('change', () => {
-      teams[idx].name = nameInput.value || `קבוצה ${idx + 1}`;
-    });
-
-    colorInput.addEventListener('change', () => {
-      teams[idx].color = colorInput.value;
-    });
-
-    container.appendChild(teamDiv);
-  });
-}
-  // Event Listeners
-function initializeEventListeners() {
-  // Config Form
-  document.getElementById('configForm').addEventListener('submit', (e) => {
-    e.preventDefault();
-    if (validateForm(e.target)) {
-      numTeams = parseInt(document.getElementById('numTeamsInput').value);
-      playersPerTeam = parseInt(document.getElementById('playersPerTeamInput').value);
-      totalPlayers = numTeams * playersPerTeam;
-      document.getElementById('totalPlayersSpan').textContent = totalPlayers;
-      showScreen('screenPlayers');
-    }
-  });
-
-  // Players Form
-  const playersForm = document.getElementById('playersForm');
-  const playersInput = document.getElementById('playersInput');
-  const submitButton = playersForm.querySelector('button[type="submit"]');
-
-  playersForm.addEventListener('submit', function(e) {
-    e.preventDefault();
-    if (validateForm(e.target)) {
-      const rawText = playersInput.value.trim();
-      const names = rawText.split(/[\n,]+/)
-        .map(name => name.trim())
-        .filter(name => name && name.length > 0);
-
-      if (names.length === totalPlayers) {
-        playersPool = names;
-        setupTeamsArray();
-        renderTeamsDefinition();
-        showScreen('screenDefineTeams');
-      } else {
-        showErrorModal('שגיאה', `נא להזין בדיוק ${totalPlayers} שמות! (הוזנו ${names.length} שמות)`);
-      }
-    }
-  });
-
-  // Teams Definition Done Button
-  const teamsDefinitionDoneBtn = document.getElementById('teamsDefinitionDoneBtn');
-  if (teamsDefinitionDoneBtn) {
-    teamsDefinitionDoneBtn.addEventListener('click', () => {
-      console.log('Teams Definition Done Button Clicked');
-      renderPlayerAssignment();
-      showScreen('screenAssign');
-    });
-  } else {
-    console.error('teamsDefinitionDoneBtn not found');
-  }
-
-  // Finish Assignment Button
-  document.getElementById('finishAssignBtn').addEventListener('click', () => {
-    if (validateTeamSizes()) {
-      showFirstMatchSelection();
-    }
-  });
-
-  // End Tournament Button
-  document.getElementById('endTournamentBtn').addEventListener('click', () => {
-    showEndTournamentModal();
-  });
-}
-    // Modal Functions
+// Modal Functions
 function showErrorModal(title, message) {
   const modalHTML = `
     <div class="modal fade" id="errorModal" tabindex="-1">
@@ -1263,8 +963,7 @@ function renderScorersTable() {
     </tr>
   `).join('');
 }
-
-function renderMatchesTable() {
+    function renderMatchesTable() {
   const tbody = document.getElementById('matchesTableBody');
   tbody.innerHTML = matches.map((match, index) => `
     <tr>
@@ -1282,7 +981,8 @@ function submitMatch() {
   // Show scorers modal
   showScorersModal(scores[0], scores[1]);
 }
-    function showScorersModal(homeGoals, awayGoals) {
+
+function showScorersModal(homeGoals, awayGoals) {
   const modalHTML = `
     <div class="modal fade" id="scorersModal" tabindex="-1">
       <div class="modal-dialog modal-dialog-centered">
@@ -1562,6 +1262,39 @@ function continueAfterTie() {
     function sortTeams() {
         teams.sort((a, b) => b.points - a.points);
     }
+    
+      function renderSquadsMenu(){
+           const container = document.getElementById('squadsContainer');
+          container.innerHTML = "";
+           teams.forEach((team, idx) => {
+            const teamDiv = document.createElement('div');
+           teamDiv.className = 'mb-2 p-2 border rounded';
+            teamDiv.innerHTML = `
+              <h6 class="mb-2">${team.name} <span style="background-color: ${team.color}" class="badge"> </span></h6>
+              <div id="team-squad-${idx}" class="team-container">
+                </div>
+              
+            `;
+               container.appendChild(teamDiv)
+
+            const teamElement = document.getElementById(`team-squad-${idx}`);
+             team.players.forEach(player=>{
+                 const playerDiv = document.createElement('div');
+                 playerDiv.className = 'draggable-player';
+                 playerDiv.textContent = player;
+                 playerDiv.setAttribute('data-player', player)
+                   playerDiv.addEventListener('click', function() {
+                       clearActivePlayers();
+                        selectPlayer(this)
+                     });
+                 teamElement.appendChild(playerDiv);
+             })
+             teamElement.addEventListener('click', function() {
+               assignPlayerToTeam(this)
+            });
+          });
+      }
+
 
 // Dark Mode Management
 function initializeDarkMode() {
