@@ -156,7 +156,7 @@
             pointer-events: auto;
         }
     </style>
-    <style>
+       <style>
         /* Buttons */
         .btn {
             border-radius: 0.75rem;
@@ -240,9 +240,9 @@
         }
 
         /* Team & Player Styles */
-         .team-container {
+          .team-container {
             min-height: auto; /* Adjusted min-height */
-            border: 2px dashed var(--primary-color);
+             border: 2px dashed var(--primary-color);
             padding: 0.5rem; /* Adjusted padding */
             margin: 0.5rem 0; /* Adjusted margin */
             border-radius: var(--card-radius);
@@ -250,13 +250,25 @@
             transition: all var(--transition-normal);
              display: flex;
              flex-direction: column;
+             
+            
         }
 
         .team-container:hover {
             border-style: solid;
             background: rgba(var(--primary-color-rgb), 0.1);
         }
-
+        .team-container .draggable-player {
+             margin: 0.25rem; /* Adjusted margin */
+             background: rgba(var(--primary-color-rgb),0.1);
+             border: 1px dashed var(--text-muted);
+              cursor: default;
+           
+        }
+         .team-container .draggable-player:hover {
+           background: rgba(var(--primary-color-rgb),0.2);
+            cursor: default;
+        }
         .draggable-player {
            padding: 0.5rem;
            margin: 0.25rem;
@@ -793,11 +805,14 @@ function getRandomColor() {
   }
   return color;
 }
-
+function clearActivePlayers(){
+    if (selectedPlayer)
+        selectedPlayer.classList.remove('active');
+}
 function renderPlayerAssignment() {
     const unassignedContainer = document.getElementById('unassignedPlayers');
     const teamContainers = document.getElementById('teamContainers');
-
+    selectedPlayer = null
     // ניקוי מיכלים
     unassignedContainer.innerHTML = '';
     teamContainers.innerHTML = '';
@@ -808,22 +823,23 @@ function renderPlayerAssignment() {
         playerDiv.className = 'draggable-player';
         playerDiv.textContent = player;
         playerDiv.setAttribute('data-player',player)
-         playerDiv.addEventListener('click', function() {
-        selectPlayer(this)
-    });
+        playerDiv.addEventListener('click', function() {
+           clearActivePlayers();
+            selectPlayer(this)
+        });
         unassignedContainer.appendChild(playerDiv);
     });
 
     // יצירת מיכלי קבוצות
     teams.forEach((team, idx) => {
         const teamDiv = document.createElement('div');
-          teamDiv.className = 'mb-3';
-          teamDiv.innerHTML = `<h5>${team.name}</h5>
+        teamDiv.className = 'mb-3';
+        teamDiv.innerHTML = `<h5>${team.name}</h5>
             <div id="team-${idx}" class="team-container" data-team-id="${idx}"></div>
              `;
 
         teamContainers.appendChild(teamDiv);
-         const teamElement = document.getElementById(`team-${idx}`);
+        const teamElement = document.getElementById(`team-${idx}`);
         teamElement.addEventListener('click', function() {
            assignPlayerToTeam(this)
        });
@@ -837,16 +853,18 @@ function renderPlayerAssignment() {
              const team=teams[teamId];
            
         if (team.players.length < playersPerTeam){
+                 const playerDiv = document.createElement('div');
+                   playerDiv.className = 'draggable-player';
+                   playerDiv.textContent = selectedPlayer.textContent
+            
                
+                 teamElement.appendChild(playerDiv);
              team.players.push(selectedPlayer.textContent);
              selectedPlayer.remove();
-             selectedPlayer = null;
-                
-           
+            selectedPlayer = null;
        }
        
       validateTeamSizes();
-
     }
 }
  function selectPlayer(playerElement){
@@ -1219,6 +1237,7 @@ function renderScorersTable() {
   `).join('');
 }
 
+
 function renderMatchesTable() {
   const tbody = document.getElementById('matchesTableBody');
   tbody.innerHTML = matches.map((match, index) => `
@@ -1418,7 +1437,6 @@ function continueAfterTie() {
        renderCurrentMatch();
   });
 }
-
     function showNextMatchSelection() {
       const modalHTML = `
           <div class="modal fade" id="selectNextMatchModal" tabindex="-1">
@@ -1519,8 +1537,6 @@ function continueAfterTie() {
     function sortTeams() {
         teams.sort((a, b) => b.points - a.points);
     }
-    
-    
 
 // Dark Mode Management
 function initializeDarkMode() {
@@ -1573,6 +1589,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initializeDarkMode();
     initializeEventListeners();
   showScreen('screenConfig');
-});
+    });
 </script>
 </html>
