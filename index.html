@@ -633,7 +633,7 @@
                         <th>נגד</th>
                         <th>הפרש</th>
                         <th>נק'</th>
-                         <th>דירוג</th>
+                        <th>דירוג</th>
                     </tr>
                     </thead>
                     <tbody id="teamsTableBody"></tbody>
@@ -1204,10 +1204,11 @@ function renderMatchesTable() {
       <td>${index + 1}</td>
       <td>${teams[match.teams[0]].name} vs ${teams[match.teams[1]].name}</td>
       <td>${match.score[0]} - ${match.score[1]}</td>
-      <td>${match.winner ? teams[match.winner].name : 'תיקו'}</td>
+      <td>${match.winner !== null ? teams[match.winner].name : 'תיקו'}</td>
     </tr>
   `).join('');
 }
+
 
 function submitMatch() {
   const scores = Array.from(document.querySelectorAll('#currentMatchTeams input')).map(input => parseInt(input.value) || 0);
@@ -1302,7 +1303,7 @@ function finishMatch(homeGoals, awayGoals) {
         score: [homeGoals, awayGoals],
         winner: winner
     });
-
+    
     // Update team stats
     updateTeamStats(activeTeams[0], activeTeams[1], homeGoals, awayGoals);
 
@@ -1321,14 +1322,17 @@ function finishMatch(homeGoals, awayGoals) {
      
         
         // Move to next match
-        if (waitingTeams.length > 0) {
-            activeTeams = [activeTeams[1], waitingTeams.shift()];
+        if (homeGoals === awayGoals) {
+          showTieModal();
+          
         } else {
-             // Check if there are teams to continue playing
-             if (teams.length > 2){
+          if (waitingTeams.length > 0) {
+              activeTeams = [activeTeams[1], waitingTeams.shift()];
+          } else {
+            // Check if there are teams to continue playing
+            if (teams.length > 2) {
                 // Create a new round with teams that still in play
-              
-                 const nextMatch =[];
+                const nextMatch =[];
                  teams.forEach((_,i) =>{
                      if (teams.length === 2 ) {
                         nextMatch.push(i)
@@ -1344,10 +1348,79 @@ function finishMatch(homeGoals, awayGoals) {
             } else {
                 showEndTournamentModal();
             }
-
         }
+        
+      renderCurrentMatch();
+    }
+  });
+}
+
+function showTieModal() {
+  const modalHTML = `
+    <div class="modal fade" id="tieModal" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">המשחק הסתיים בתיקו, בחר קבוצה להמשך</h5>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label">קבוצה שמתקדמת</label>
+              <select class="form-select form-select-lg" id="tieSelect">
+                <option value="${activeTeams[0]}">${teams[activeTeams[0]].name}</option>
+                <option value="${activeTeams[1]}">${teams[activeTeams[1]].name}</option>
+              </select>
+            </div>
+          </div>
+          <div class="modal-footer justify-content-center">
+            <button class="btn btn-primary btn-lg" onclick="continueAfterTie()">
+              <i class="bi bi-play-fill me-2"></i>
+              המשך
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.insertAdjacentHTML('beforeend', modalHTML);
+  const modal = new bootstrap.Modal(document.getElementById('tieModal'));
+  modal.show();
+}
+
+function continueAfterTie() {
+  const selectedTeam = parseInt(document.getElementById('tieSelect').value);
     
-        renderCurrentMatch();
+  const otherTeam = activeTeams.filter(team => team !== selectedTeam)[0];
+  
+    activeTeams = [selectedTeam, waitingTeams.shift()]
+    if (waitingTeams.length === 0) {
+         // Check if there are teams to continue playing
+        if (teams.length > 2){
+          const nextMatch =[];
+           teams.forEach((_,i) =>{
+              if (teams.length === 2 ) {
+                 nextMatch.push(i)
+             }else if (i > activeTeams[0] && i !== activeTeams[1])
+                {
+                    nextMatch.push(i);
+                }
+           });
+              
+            activeTeams = [nextMatch[0], nextMatch[1]];
+             waitingTeams = teams.map((_, i) => i).filter(i => !activeTeams.includes(i));
+             
+        } else {
+             showEndTournamentModal();
+         }
+    }
+
+
+  const modal = bootstrap.Modal.getInstance(document.getElementById('tieModal'));
+  modal.hide();
+  modal._element.addEventListener('hidden.bs.modal', () => {
+      modal._element.remove();
+       renderCurrentMatch();
   });
 }
 
