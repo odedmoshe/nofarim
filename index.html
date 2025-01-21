@@ -202,6 +202,7 @@
 
         .btn-success:hover {
             background: var(--secondary-dark);
+            
         }
 
         /* Timer Styles */
@@ -1209,7 +1210,6 @@ function renderMatchesTable() {
   `).join('');
 }
 
-
 function submitMatch() {
   const scores = Array.from(document.querySelectorAll('#currentMatchTeams input')).map(input => parseInt(input.value) || 0);
   
@@ -1320,39 +1320,9 @@ function finishMatch(homeGoals, awayGoals) {
     renderMatchesTable();
     document.getElementById('resetTimerBtn').click();
      
-        
-        // Move to next match
-        if (homeGoals === awayGoals) {
-          showTieModal();
-          
-        } else {
-          if (waitingTeams.length > 0) {
-              activeTeams = [activeTeams[1], waitingTeams.shift()];
-          } else {
-            // Check if there are teams to continue playing
-            if (teams.length > 2) {
-                // Create a new round with teams that still in play
-                const nextMatch =[];
-                 teams.forEach((_,i) =>{
-                     if (teams.length === 2 ) {
-                        nextMatch.push(i)
-                     }else if (i > activeTeams[0] && i !== activeTeams[1])
-                     {
-                        nextMatch.push(i);
-                     }
-                 });
-                
-                activeTeams = [nextMatch[0], nextMatch[1]];
-                 waitingTeams = teams.map((_, i) => i).filter(i => !activeTeams.includes(i));
-               
-            } else {
-                showEndTournamentModal();
-            }
-        }
-        
-      renderCurrentMatch();
-    }
-  });
+     showNextMatchSelection()
+     
+    });
 }
 
 function showTieModal() {
@@ -1424,6 +1394,67 @@ function continueAfterTie() {
   });
 }
 
+    function showNextMatchSelection() {
+      const modalHTML = `
+          <div class="modal fade" id="selectNextMatchModal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title">בחירת משחק הבא</h5>
+                </div>
+                <div class="modal-body">
+                  <div class="mb-3">
+                    <label class="form-label">קבוצה ראשונה</label>
+                    <select class="form-select form-select-lg" id="nextFirstTeamSelect">
+                      ${teams.map((t, i) => `<option value="${i}">${t.name}</option>`).join('')}
+                    </select>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">קבוצה שניה</label>
+                    <select class="form-select form-select-lg" id="nextSecondTeamSelect">
+                      ${teams.map((t, i) => `<option value="${i}">${t.name}</option>`).join('')}
+                    </select>
+                  </div>
+                </div>
+                <div class="modal-footer justify-content-center">
+                  <button class="btn btn-primary btn-lg" onclick="continueToNextMatch()">
+                    <i class="bi bi-play-fill me-2"></i>
+                    המשך
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+
+      document.body.insertAdjacentHTML('beforeend', modalHTML);
+      const modal = new bootstrap.Modal(document.getElementById('selectNextMatchModal'));
+      modal.show();
+    }
+    function continueToNextMatch() {
+        const firstTeam = parseInt(document.getElementById('nextFirstTeamSelect').value);
+        const secondTeam = parseInt(document.getElementById('nextSecondTeamSelect').value);
+        
+        if (firstTeam === secondTeam) {
+            showErrorModal('שגיאה', 'יש לבחור שתי קבוצות שונות');
+            return;
+        }
+
+
+        
+        activeTeams = [firstTeam, secondTeam];
+        waitingTeams = teams.map((_, i) => i).filter(i => !activeTeams.includes(i));
+
+        const modal = bootstrap.Modal.getInstance(document.getElementById('selectNextMatchModal'));
+        if (modal) {
+            modal.hide();
+            modal._element.addEventListener('hidden.bs.modal', () => {
+                modal._element.remove();
+                renderCurrentMatch();
+            });
+        }
+    }
+
   function updateTeamStats(team1Index, team2Index, team1Score, team2Score) {
     const team1 = teams[team1Index];
     const team2 = teams[team2Index];
@@ -1463,7 +1494,6 @@ function continueAfterTie() {
     function sortTeams() {
         teams.sort((a, b) => b.points - a.points);
     }
-
 
 // Dark Mode Management
 function initializeDarkMode() {
