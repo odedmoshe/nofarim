@@ -532,11 +532,11 @@
           </div>
           <div id="teamsDefinition" class="mb-4"></div>
           <div class="text-center">
-            <button class="btn btn-primary btn-lg" id="teamsDefinitionDoneBtn">
-              <i class="bi bi-arrow-left me-2"></i>
-              המשך לחלוקת שחקנים
-            </button>
-          </div>
+  <button type="button" class="btn btn-primary btn-lg" id="teamsDefinitionDoneBtn">
+    <i class="bi bi-arrow-left me-2"></i>
+    המשך לחלוקת שחקנים
+  </button>
+</div>
         </div>
       </div>
     </div>
@@ -786,6 +786,52 @@ function getRandomColor() {
   }
   return color;
 }
+// אחרי getRandomColor() והפונקציות הבסיסיות האחרות
+function renderPlayerAssignment() {
+  const unassignedContainer = document.getElementById('unassignedPlayers');
+  const teamContainers = document.getElementById('teamContainers');
+  
+  // ניקוי מיכלים
+  unassignedContainer.innerHTML = '';
+  teamContainers.innerHTML = '';
+  
+  // הוספת שחקנים לא משובצים
+  playersPool.forEach(player => {
+    const playerDiv = document.createElement('div');
+    playerDiv.className = 'draggable-player';
+    playerDiv.textContent = player;
+    playerDiv.setAttribute('draggable', 'true');
+    unassignedContainer.appendChild(playerDiv);
+  });
+  
+  // יצירת מיכלי קבוצות
+  teams.forEach((team, idx) => {
+    const teamDiv = document.createElement('div');
+    teamDiv.className = 'mb-3';
+    teamDiv.innerHTML = `
+      <h5>${team.name}</h5>
+      <div id="team-${idx}" class="team-container" data-team-id="${idx}"></div>
+    `;
+    teamContainers.appendChild(teamDiv);
+  });
+
+  // הפעלת הדראג-אנד-דרופ
+  function initializeDragAndDrop() {
+  const unassignedContainer = document.getElementById('unassignedPlayers');
+  const teamContainers = document.querySelectorAll('.team-container');
+  
+  [unassignedContainer, ...teamContainers].forEach(container => {
+    new Sortable(container, {
+      group: 'shared',
+      animation: 150,
+      ghostClass: 'sortable-ghost',
+      dragClass: 'sortable-drag',
+      onEnd: (evt) => {
+        validateTeamSizes();
+      }
+    });
+  });
+}
 
 // Event Listeners
 function initializeEventListeners() {
@@ -826,11 +872,16 @@ function initializeEventListeners() {
   });
 
   // Teams Definition Done Button
-  document.getElementById('teamsDefinitionDoneBtn').addEventListener('click', () => {
-    initializeDragAndDrop();
+const teamsDefinitionDoneBtn = document.getElementById('teamsDefinitionDoneBtn');
+if (teamsDefinitionDoneBtn) {
+  teamsDefinitionDoneBtn.addEventListener('click', () => {
+    console.log('Teams Definition Done Button Clicked');
     renderPlayerAssignment();
     showScreen('screenAssign');
   });
+} else {
+  console.error('teamsDefinitionDoneBtn not found');
+}
 
   // Finish Assignment Button
   document.getElementById('finishAssignBtn').addEventListener('click', () => {
