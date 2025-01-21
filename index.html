@@ -520,8 +520,7 @@
         </div>
       </div>
     </div>
-
-    <!-- Screen 3: Team Definition -->
+        <!-- Screen 3: Team Definition -->
     <div id="screenDefineTeams" class="screen">
       <div class="card">
         <div class="card-body p-4">
@@ -634,7 +633,7 @@
                 <th>נגד</th>
                 <th>הפרש</th>
                 <th>נק'</th>
-                <th>דירוג</th>
+                 <th>דירוג</th>
               </tr>
             </thead>
             <tbody id="teamsTableBody"></tbody>
@@ -655,7 +654,7 @@
             <thead>
               <tr>
                 <th>שחקן</th>
-                <th>קבוצה</th>
+                 <th>קבוצה</th>
                 <th>שערים</th>
               </tr>
             </thead>
@@ -688,8 +687,7 @@
       </div>
     </div>
   </div>
-
-  <!-- Dark Mode Toggle -->
+    <!-- Dark Mode Toggle -->
   <button class="dark-mode-toggle" id="darkModeToggle" title="שינוי מצב תצוגה">
     <i class="bi bi-moon-fill"></i>
   </button>
@@ -1169,7 +1167,7 @@ function renderTeamsTable() {
   tbody.innerHTML = teams.map((team, index) => `
     <tr>
       <td>${team.name}</td>
-      <td><span class="badge" style="background-color: ${team.color}">&nbsp;</span></td>
+      <td><span class="badge" style="background-color: ${team.color}"> </span></td>
       <td>${team.w}</td>
       <td>${team.d}</td>
       <td>${team.l}</td>
@@ -1183,19 +1181,20 @@ function renderTeamsTable() {
 }
 
 function renderScorersTable() {
-  const tbody = document.getElementById('scorersTableBody');
-  const scorersList = Object.entries(scorers)
-    .sort(([,a], [,b]) => b - a)
-    .slice(0, 10);
+    const tbody = document.getElementById('scorersTableBody');
+    const scorersList = Object.entries(scorers)
+        .sort(([, a], [, b]) => b - a)
+        .slice(0, 10);
 
-  tbody.innerHTML = scorersList.map(([player, goals]) => `
+    tbody.innerHTML = scorersList.map(([player, goals]) => `
     <tr>
       <td>${player}</td>
-      <td>${getPlayerTeam(player)}</td>
+       <td>${getPlayerTeam(player)}</td>
       <td>${goals}</td>
     </tr>
   `).join('');
 }
+
 
 function renderMatchesTable() {
   const tbody = document.getElementById('matchesTableBody');
@@ -1208,6 +1207,7 @@ function renderMatchesTable() {
     </tr>
   `).join('');
 }
+
 
 function submitMatch() {
   const scores = Array.from(document.querySelectorAll('#currentMatchTeams input')).map(input => parseInt(input.value) || 0);
@@ -1252,7 +1252,7 @@ function showScorersModal(homeGoals, awayGoals) {
                         ${teams[activeTeams[1]].players.map(player => 
                           `<option value="${player}">${player}</option>`
                         ).join('')}
-                        <option value="own_goal">שער עצמי לחובת הקבוצה</option>
+                         <option value="own_goal">שער עצמי לחובת הקבוצה</option>
                       </select>
                     </div>
                   `).join('')}
@@ -1278,31 +1278,20 @@ function showScorersModal(homeGoals, awayGoals) {
 
 function finishMatch(homeGoals, awayGoals) {
   const scorerSelects = document.querySelectorAll('.scorer-select');
-  scorerSelects.forEach(select => {
-    const player = select.value;
-    const teamId = parseInt(select.dataset.team);
+    scorerSelects.forEach(select => {
+        const player = select.value;
+        const teamId = parseInt(select.dataset.team);
 
-    if (player === "own_goal") {
-      // עדכון שער עצמי
-      const opponentTeamId = teamId === 0 ? 1 : 0;
-      teams[opponentTeamId].gf += 1;
-      teams[teamId].ga += 1;
-      teams[opponentTeamId].points += 3; // נקודות למתחרה
-    } else if (player) {
-      scorers[player] = (scorers[player] || 0) + 1;
-    }
-  });
+        if (player === "own_goal") {
+            // עדכון שער עצמי
+             const opponentTeamId = teamId === 0 ? 1 : 0;
+             teams[opponentTeamId].gf += 1;
+             teams[teamId].ga += 1;
+        } else if (player) {
+            scorers[player] = (scorers[player] || 0) + 1;
+        }
+    });
 
-  renderTeamsTable();
-  renderScorersTable();
-  renderMatchesTable();
-
-  const modal = bootstrap.Modal.getInstance(document.getElementById('scorersModal'));
-  modal.hide();
-  modal._element.addEventListener('hidden.bs.modal', () => {
-    modal._element.remove();
-  });
-}
 
   // Update match data
   let winner = null;
@@ -1329,8 +1318,74 @@ function finishMatch(homeGoals, awayGoals) {
     renderScorersTable();
     renderMatchesTable();
     document.getElementById('resetTimerBtn').click();
+     
+        
+        // Move to next match
+        if (waitingTeams.length > 0) {
+            activeTeams = [activeTeams[1], waitingTeams.shift()];
+        } else {
+             // Check if there are teams to continue playing
+             if (teams.length > 2){
+                // Create a new round with teams that still in play
+              
+                 const nextMatch =[];
+                 teams.forEach((_,i) =>{
+                     if (teams.length === 2 ) {
+                        nextMatch.push(i)
+                     }else if (i > activeTeams[0] && i !== activeTeams[1])
+                     {
+                        nextMatch.push(i);
+                     }
+                 });
+                
+                activeTeams = [nextMatch[0], nextMatch[1]];
+                 waitingTeams = teams.map((_, i) => i).filter(i => !activeTeams.includes(i));
+               
+            } else {
+                showEndTournamentModal();
+            }
+
+        }
+    
+        renderCurrentMatch();
   });
 }
+  function updateTeamStats(team1Index, team2Index, team1Score, team2Score) {
+    const team1 = teams[team1Index];
+    const team2 = teams[team2Index];
+
+    team1.gf += team1Score;
+    team1.ga += team2Score;
+    team2.gf += team2Score;
+    team2.ga += team1Score;
+
+    if (team1Score > team2Score) {
+        team1.w++;
+        team2.l++;
+        team1.points += 3;
+    } else if (team2Score > team1Score) {
+         team2.w++;
+         team1.l++;
+         team2.points += 3;
+    } else {
+      team1.d++;
+      team2.d++;
+       team1.points += 1;
+        team2.points += 1;
+    }
+
+    team1.gd = team1.gf - team1.ga;
+    team2.gd = team2.gf - team2.ga;
+  }
+    function getPlayerTeam(playerName) {
+        for (const team of teams) {
+            if (team.players.includes(playerName)) {
+                return team.name;
+            }
+        }
+        return "לא משוייך";
+    }
+
 
 // Dark Mode Management
 function initializeDarkMode() {
