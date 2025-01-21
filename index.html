@@ -156,7 +156,7 @@
             pointer-events: auto;
         }
     </style>
-     <style>
+    <style>
         /* Buttons */
         .btn {
             border-radius: 0.75rem;
@@ -240,14 +240,16 @@
         }
 
         /* Team & Player Styles */
-          .team-container {
-            min-height: 100px; /* Adjusted min-height */
+         .team-container {
+            min-height: auto; /* Adjusted min-height */
             border: 2px dashed var(--primary-color);
-            padding: 1rem;
-            margin: 1rem 0;
+            padding: 0.5rem; /* Adjusted padding */
+            margin: 0.5rem 0; /* Adjusted margin */
             border-radius: var(--card-radius);
             background: rgba(var(--primary-color-rgb), 0.05);
             transition: all var(--transition-normal);
+             display: flex;
+             flex-direction: column;
         }
 
         .team-container:hover {
@@ -256,28 +258,30 @@
         }
 
         .draggable-player {
-            padding: 1rem;
-            margin: 0.5rem 0;
-            background: var(--surface-color);
-            border: 1px solid var(--text-muted);
-            border-radius: 0.75rem;
-            cursor: grab;
+           padding: 0.5rem;
+           margin: 0.25rem;
+           background: var(--surface-color);
+           border: 1px solid var(--text-muted);
+           border-radius: 0.75rem;
             transition: all var(--transition-fast);
-            user-select: none;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+           user-select: none;
+            display: inline-block; /* Make it inline-block to control width */
+            cursor: pointer;
         }
-
         .draggable-player:hover {
-            background: var(--primary-color);
+           background: var(--primary-color);
+           color: white;
+           border-color: var(--primary-color);
+           transform: translateX(-4px);
+       }
+          .draggable-player.active {
+           background: var(--secondary-color);
             color: white;
-            border-color: var(--primary-color);
-            transform: translateX(-4px);
+           border-color: var(--secondary-color);
         }
 
         .draggable-player:active {
-            cursor: grabbing;
+            cursor: pointer;
         }
 
         .sortable-ghost {
@@ -543,18 +547,24 @@
                 <div class="text-center mb-4">
                     <i class="bi bi-diagram-3-fill text-primary" style="font-size: 3rem;"></i>
                     <h2 class="mt-3">חלוקת שחקנים לקבוצות</h2>
-                    <p class="text-muted">גרור את השחקנים לקבוצות המתאימות</p>
+                    <p class="text-muted">בחר שחקן ואז קבוצה כדי לשייך אותו</p>
                 </div>
-                 <div class="d-flex flex-column">
-                        <div class="unassigned-container">
-                            <h5>
-                                <i class="bi bi-person-lines-fill me-2"></i>
-                                שחקנים לא משובצים
-                            </h5>
-                            <div id="unassignedPlayers" class="team-container"></div>
-                        </div>
+                
+                 <div class="d-flex">
+                        
+                    <div  style="width: 40%;" >
+                        
+                        <h5>
+                            <i class="bi bi-person-lines-fill me-2"></i>
+                            שחקנים לא משובצים
+                        </h5>
+                         <div id="unassignedPlayers" class="team-container">
+                         </div>
+                    </div>
                   
-                   <div id="teamContainers" class="d-flex flex-column"></div>
+                   <div id="teamContainers" style="width: 60%;">
+                     
+                     </div>
                         
                 </div>
                
@@ -631,7 +641,7 @@
                         <th>נגד</th>
                         <th>הפרש</th>
                         <th>נק'</th>
-                         <th>דירוג</th>
+                        <th>דירוג</th>
                     </tr>
                     </thead>
                     <tbody id="teamsTableBody"></tbody>
@@ -702,6 +712,8 @@ let activeTeams = [];
 let waitingTeams = [];
 let matches = [];
 let scorers = {};
+let selectedPlayer = null;
+
 
 // Timer Variables
 let matchTimer = null;
@@ -782,73 +794,84 @@ function getRandomColor() {
   return color;
 }
 
-// Drag & Drop Functions
-function initializeDragAndDrop() {
-  const unassignedContainer = document.getElementById('unassignedPlayers');
-  const teamContainers = document.querySelectorAll('.team-container');
-  
-  [unassignedContainer, ...teamContainers].forEach(container => {
-    new Sortable(container, {
-      group: 'shared',
-      animation: 150,
-      ghostClass: 'sortable-ghost',
-      dragClass: 'sortable-drag',
-      onEnd: (evt) => {
-        validateTeamSizes();
+function renderPlayerAssignment() {
+    const unassignedContainer = document.getElementById('unassignedPlayers');
+    const teamContainers = document.getElementById('teamContainers');
+
+    // ניקוי מיכלים
+    unassignedContainer.innerHTML = '';
+    teamContainers.innerHTML = '';
+
+    // הוספת שחקנים לא משובצים
+    playersPool.forEach(player => {
+        const playerDiv = document.createElement('div');
+        playerDiv.className = 'draggable-player';
+        playerDiv.textContent = player;
+        playerDiv.setAttribute('data-player',player)
+         playerDiv.addEventListener('click', function() {
+        selectPlayer(this)
+    });
+        unassignedContainer.appendChild(playerDiv);
+    });
+
+    // יצירת מיכלי קבוצות
+    teams.forEach((team, idx) => {
+        const teamDiv = document.createElement('div');
+          teamDiv.className = 'mb-3';
+          teamDiv.innerHTML = `<h5>${team.name}</h5>
+            <div id="team-${idx}" class="team-container" data-team-id="${idx}"></div>
+             `;
+
+        teamContainers.appendChild(teamDiv);
+         const teamElement = document.getElementById(`team-${idx}`);
+        teamElement.addEventListener('click', function() {
+           assignPlayerToTeam(this)
+       });
+    });
+
+}
+    function assignPlayerToTeam(teamElement) {
+
+    if (selectedPlayer) {
+           const teamId = teamElement.dataset.teamId;
+             const team=teams[teamId];
+           
+        if (team.players.length < playersPerTeam){
+               
+             team.players.push(selectedPlayer.textContent);
+             selectedPlayer.remove();
+             selectedPlayer = null;
+                
+           
+       }
+       
+      validateTeamSizes();
+
+    }
+}
+ function selectPlayer(playerElement){
+     if (selectedPlayer)
+        selectedPlayer.classList.remove('active');
+    selectedPlayer = playerElement
+   selectedPlayer.classList.add('active');
+ }
+function validateTeamSizes() {
+    let isValid = true;
+    
+    teams.forEach((team, idx) => {
+      const container = document.getElementById(`team-${idx}`);
+      const players = container.querySelectorAll('.draggable-player');
+      team.players = Array.from(players).map(p => p.textContent);
+      
+      if (players.length !== playersPerTeam) {
+        isValid = false;
       }
     });
-  });
-}
-
-function renderPlayerAssignment() {
-  const unassignedContainer = document.getElementById('unassignedPlayers');
-  const teamContainers = document.getElementById('teamContainers');
-  
-  // ניקוי מיכלים
-  unassignedContainer.innerHTML = '';
-  teamContainers.innerHTML = '';
-  
-  // הוספת שחקנים לא משובצים
-  playersPool.forEach(player => {
-    const playerDiv = document.createElement('div');
-    playerDiv.className = 'draggable-player';
-    playerDiv.textContent = player;
-    playerDiv.setAttribute('draggable', 'true');
-    unassignedContainer.appendChild(playerDiv);
-  });
-  
-  // יצירת מיכלי קבוצות
-  teams.forEach((team, idx) => {
-    const teamDiv = document.createElement('div');
-    teamDiv.className = 'mb-3';
-    teamDiv.innerHTML = `
-      <h5>${team.name}</h5>
-      <div id="team-${idx}" class="team-container" data-team-id="${idx}"></div>
-    `;
-    teamContainers.appendChild(teamDiv);
-  });
-
-  // הפעלת הדראג-אנד-דרופ
-  initializeDragAndDrop();
-}
-
-function validateTeamSizes() {
-  const teamContainers = document.querySelectorAll('#teamContainers .team-container');
-  let isValid = true;
-  
-  teams.forEach((team, idx) => {
-    const container = document.getElementById(`team-${idx}`);
-    const players = container.querySelectorAll('.draggable-player');
-    team.players = Array.from(players).map(p => p.textContent);
     
-    if (players.length !== playersPerTeam) {
-      isValid = false;
-    }
-  });
-  
-  document.getElementById('finishAssignBtn').disabled = !isValid;
-  return isValid;
+    document.getElementById('finishAssignBtn').disabled = !isValid;
+    return isValid;
 }
+
 
 function renderTeamsDefinition() {
   const container = document.getElementById('teamsDefinition');
@@ -1092,6 +1115,8 @@ function startTournamentWithTeams() {
     startBtn.disabled = false;
     pauseBtn.disabled = true;
     clearInterval(matchTimer);
+    document.getElementById('matchTimer').classList.remove('warning', 'extra-time', 'end');
+    updateTimerDisplay();
   });
 
   resetBtn.addEventListener('click', () => {
@@ -1455,7 +1480,6 @@ function continueAfterTie() {
         }
     }
 
-
   function updateTeamStats(team1Index, team2Index, team1Score, team2Score) {
     const team1 = teams[team1Index];
     const team2 = teams[team2Index];
@@ -1495,6 +1519,8 @@ function continueAfterTie() {
     function sortTeams() {
         teams.sort((a, b) => b.points - a.points);
     }
+    
+    
 
 // Dark Mode Management
 function initializeDarkMode() {
